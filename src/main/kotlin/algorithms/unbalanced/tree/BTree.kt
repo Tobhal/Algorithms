@@ -2,48 +2,30 @@ package algorithms.unbalanced.tree
 
 import algorithms.util.Node
 import java.util.*
-import kotlin.reflect.KFunction0
+import kotlin.reflect.KFunction1
 
-class BTree<T>(
-    private val data: T,
-    private var left: BTree<T>? = null,
-    private var right: BTree<T>? = null
-) where T: Comparable<T> {
+class BTree<T> where T: Comparable<T> {
     private var root: Node<T>? = null
 
     /*
     Status stuff
      */
-    fun isFull(): Boolean = (left != null) && (right != null)
+    fun numNodes(): Int = numNodes(root)
 
-    fun numNodes(): Int = 1 + numNodes(left) + numNodes(right)
+    fun numLeaves(): Int = numLeaves(root)
 
-    fun numLeaves(): Int = numLeaves(left) + numLeaves(right)
+    fun numTwoChildren(): Int = numTwoChildren(root)
 
-    fun numTwoChildren(): Int {
-        var add = 0
+    fun numLevels(): Int = numLevels(root)
 
-        if (left != null && right != null)
-            add = 1
-
-        return add + numTwoChildren(left) + numTwoChildren(right)
-    }
-
-    fun numLevels(): Int {
-        val nLeft = numLevels(left)
-        val nRight = numLevels(right)
-
-        return if (nLeft > nRight) nLeft else nRight
-    }
-
-    private fun numNodes(root: BTree<T>?): Int {
+    private fun numNodes(root: Node<T>?): Int {
         if (root == null)
             return 0
 
         return 1 + numNodes(root.left) + numNodes(root.right)
     }
 
-    private fun numLeaves(root: BTree<T>?): Int {
+    private fun numLeaves(root: Node<T>?): Int {
         if (root == null)
             return 0
 
@@ -53,7 +35,7 @@ class BTree<T>(
         return numLeaves(root.left) + numLeaves(root.right)
     }
 
-    private fun numTwoChildren(root: BTree<T>?): Int {
+    private fun numTwoChildren(root: Node<T>?): Int {
         if (root == null)
             return 0
 
@@ -65,7 +47,7 @@ class BTree<T>(
         return add + numTwoChildren(root.left) + numTwoChildren(root.right)
     }
 
-    private fun numLevels(root: BTree<T>?): Int {
+    private fun numLevels(root: Node<T>?): Int {
         if (root == null)
             return 0
 
@@ -78,88 +60,78 @@ class BTree<T>(
     /*
     Add stuff
      */
-    // TODO: Fix this
-    fun add(data: T) {
-        if (this.data == data)
-            return
+    fun insert(data: T) {
+        this.root = insert(root, data)
+    }
 
-        if (left == null && this.data > data) {
-            left = BTree(data)
-            return
-        }
-
-        if (right == null && this.data < data) {
-            right = BTree(data)
-            return
+    fun insert(data: List<T>) {
+        for (e in data) {
+            root = insert(root, e)
         }
     }
 
-    fun addChild(data: T) {
-        if (contains(data))
-            return
-
-        if (left == null)
-            left = BTree(data)
-        else if (right == null)
-            right = BTree(data)
-        else if (!left!!.isFull() && !right!!.isFull() || left!!.numNodes() > right!!.numNodes())
-            left!!.addChild(data)
-        else if (left!!.isFull() && !right!!.isFull() || left!!.numNodes() < right!!.numNodes())
-            right!!.addChild(data)
+    private fun insert(root: Node<T>?, data: T): Node<T> {
+        if (root == null)
+            return Node(data)
+        else if (data < root.data)
+            root.left = insert(root.left, data)
+        else if (data > root.data)
+            root.right = insert(root.right, data)
         else
-            left!!.addChild(data)
+            root.count++
+        return root
     }
 
     /*
     Util
      */
-    fun contains(data: T): Boolean = preorder().contains(data)
+    fun contains(data: T): Boolean = root?.let { preorder(it).contains(data) }!!
 
     /*
     Print stuff
      */
-    fun print(order: KFunction0<ArrayList<T>> = this::preorder) {
-        for (e in order())
+    fun print(order: KFunction1<Node<T>, ArrayList<T>> = this::preorder) {
+        for (e in root?.let { order(it) }!!)
             print("$e ")
         println()
     }
 
-     fun preorder(): ArrayList<T> {
+    fun preorder(root: Node<T>): ArrayList<T> {
         val arr = ArrayList<T>()
-        arr.add(this.data)
-        left?.preorder()?.let { arr.addAll(it) }
-        right?.preorder()?.let { arr.addAll(it) }
+        root.let { arr.add(it.data) }
+        root.left?.let { preorder(it) }?.let { arr.addAll(it) }
+        root.right?.let { preorder(it) }?.let { arr.addAll(it) }
         return arr
     }
 
-     fun inorder(): ArrayList<T> {
+    fun inorder(root: Node<T>): ArrayList<T> {
         val arr = ArrayList<T>()
-        left?.inorder()?.let { arr.addAll(it) }
-        arr.add(this.data)
-        right?.inorder()?.let { arr.addAll(it) }
+        root.left?.let { inorder(it) }?.let { arr.addAll(it) }
+        root.let { arr.add(it.data) }
+        root.right?.let { inorder(it) }?.let { arr.addAll(it) }
         return arr
     }
 
-     fun postorder(): ArrayList<T> {
+    fun postorder(root: Node<T>): ArrayList<T> {
         val arr = ArrayList<T>()
-        left?.postorder()?.let { arr.addAll(it) }
-        right?.postorder()?.let { arr.addAll(it) }
-        arr.add(this.data)
+        root.left?.let { postorder(it) }?.let { arr.addAll(it) }
+        root.right?.let { postorder(it) }?.let { arr.addAll(it) }
+        root.let { arr.add(it.data) }
         return arr
     }
 
-     fun dfs(): ArrayList<T> {
+     fun bfs(root: Node<T>): ArrayList<T> {
         val arr = ArrayList<T>()
-        val queue = LinkedList<BTree<T>>()
+        val queue = LinkedList<Node<T>>()
 
-        arr.add(this.data)
+         root.let { arr.add(it.data) }
 
-        if (left != null)
-            queue.add(left!!)
-        if (right != null)
-            queue.add(right!!)
+        if (root.left != null)
+            queue.add(root.left!!)
+        if (root.right != null)
+            queue.add(root.right!!)
 
-        var node: BTree<T>
+        var node: Node<T>
 
         while (!queue.isEmpty()) {
             node = queue.remove()
