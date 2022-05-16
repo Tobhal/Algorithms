@@ -10,22 +10,14 @@ class BTree<T> where T: Comparable<T> {
     /*
     Status stuff
      */
-    fun numNodes(): Int = numNodes(root)
-
-    fun numLeaves(): Int = numLeaves(root)
-
-    fun numTwoChildren(): Int = numTwoChildren(root)
-
-    fun numLevels(): Int = numLevels(root)
-
-    private fun numNodes(root: Node<T>?): Int {
+    fun numNodes(root: Node<T>? = this.root): Int {
         if (root == null)
             return 0
 
         return 1 + numNodes(root.left) + numNodes(root.right)
     }
 
-    private fun numLeaves(root: Node<T>?): Int {
+    fun numLeaves(root: Node<T>? = this.root): Int {
         if (root == null)
             return 0
 
@@ -35,7 +27,7 @@ class BTree<T> where T: Comparable<T> {
         return numLeaves(root.left) + numLeaves(root.right)
     }
 
-    private fun numTwoChildren(root: Node<T>?): Int {
+    fun numTwoChildren(root: Node<T>? = this.root): Int {
         if (root == null)
             return 0
 
@@ -47,7 +39,7 @@ class BTree<T> where T: Comparable<T> {
         return add + numTwoChildren(root.left) + numTwoChildren(root.right)
     }
 
-    private fun numLevels(root: Node<T>?): Int {
+    fun numLevels(root: Node<T>? = this.root): Int {
         if (root == null)
             return 0
 
@@ -82,10 +74,84 @@ class BTree<T> where T: Comparable<T> {
         return root
     }
 
+    fun remove(data: T) {
+        if (root == null)
+            return
+
+        if (data == root?.data)
+            root = replacement(root!!)
+        else {
+            var parent = root
+            var finished = false
+
+            var current = if (data < root!!.data)
+                root!!.left
+            else
+                root!!.right
+
+            while (current != null && !finished) {
+                if (current.data == data) {
+                    if (current == parent?.left)
+                        parent.left = replacement(current)
+                    else
+                        parent?.right = replacement(current)
+                    finished = true
+                } else {
+                    parent = current
+                    if (data < current.data)
+                        current = current.left
+                    else
+                        current = current.right
+                }
+            }
+
+        }
+    }
+
+    private fun replacement(node: Node<T>): Node<T>? {
+        if (node.left == null && node.right == null)
+            return null
+        else if (node.left != null && node.right == null)
+            return node.left
+        else if (node.left == null && node.right != null)
+            return node.right
+        else {
+            if (node.left?.right == null) {
+                node.left?.right = node.right
+                return node.left
+            }
+
+            var current = node.left
+            var parent = node
+            while (current?.right != null) {
+                parent = current
+                current = current.right
+            }
+
+            parent.right = current?.left
+            current?.left = node.left
+            current?.right = node.right
+            return current
+        }
+    }
+
     /*
     Util
      */
-    fun contains(data: T): Boolean = root?.let { preorder(it).contains(data) }!!
+    // fun contains(data: T): Boolean = root?.let { preorder(it).contains(data) }!!
+
+    fun contains(data: T, root: Node<T>? = this.root): Boolean {
+        if (root == null)
+            return false
+
+        if (root.data == data)
+            return true
+
+        return if (root.data < data)
+            contains(data, root.right)
+        else
+            contains(data, root.left)
+    }
 
     /*
     Print stuff
