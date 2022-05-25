@@ -1,6 +1,6 @@
 package algorithms.util
 
-open class Node<T> (
+data class Node<T> (
     val data: T,
 ) {
     var count = 0

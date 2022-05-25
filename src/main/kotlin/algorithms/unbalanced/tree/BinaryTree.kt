@@ -3,8 +3,9 @@ package algorithms.unbalanced.tree
 import algorithms.util.Node
 import java.util.*
 import kotlin.reflect.KFunction1
+import algorithms.interfaces.BinaryTree
 
-class BTree<T> where T: Comparable<T> {
+class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     private var root: Node<T>? = null
 
     /*
@@ -52,15 +53,11 @@ class BTree<T> where T: Comparable<T> {
     /*
     Add stuff
      */
-    fun insert(data: T) {
+    override fun insert(data: T) {
         this.root = insert(root, data)
     }
 
-    fun insert(data: List<T>) {
-        for (e in data) {
-            root = insert(root, e)
-        }
-    }
+    override fun insert(data: List<T>) = data.forEach(){insert(it)}
 
     private fun insert(root: Node<T>?, data: T): Node<T> {
         if (root == null)
@@ -74,11 +71,12 @@ class BTree<T> where T: Comparable<T> {
         return root
     }
 
-    fun remove(data: T) {
+    override fun remove(data: T) {
         if (root == null)
             return
 
         if (data == root?.data)
+            // Case 1 - Delete leaf Node
             root = replacement(root!!)
         else {
             var parent = root
@@ -90,6 +88,7 @@ class BTree<T> where T: Comparable<T> {
                 root!!.right
 
             while (current != null && !finished) {
+                // Case 2 - Delete node with one child
                 if (current.data == data) {
                     if (current == parent?.left)
                         parent.left = replacement(current)
@@ -97,6 +96,7 @@ class BTree<T> where T: Comparable<T> {
                         parent?.right = replacement(current)
                     finished = true
                 } else {
+                    // Case 3 - Delete Node with 2 children
                     parent = current
                     if (data < current.data)
                         current = current.left
@@ -138,9 +138,9 @@ class BTree<T> where T: Comparable<T> {
     /*
     Util
      */
-    // fun contains(data: T): Boolean = root?.let { preorder(it).contains(data) }!!
+    override fun contains(data: T): Boolean = contains(data, root)
 
-    fun contains(data: T, root: Node<T>? = this.root): Boolean {
+    private fun contains(data: T, root: Node<T>? = this.root): Boolean {
         if (root == null)
             return false
 
@@ -186,11 +186,11 @@ class BTree<T> where T: Comparable<T> {
         return arr
     }
 
-     fun bfs(root: Node<T>): ArrayList<T> {
+    fun bfs(root: Node<T>): ArrayList<T> {
         val arr = ArrayList<T>()
         val queue = LinkedList<Node<T>>()
 
-         root.let { arr.add(it.data) }
+        root.let { arr.add(it.data) }
 
         if (root.left != null)
             queue.add(root.left!!)
@@ -209,4 +209,6 @@ class BTree<T> where T: Comparable<T> {
         }
         return arr
     }
+
+    override fun toString(): String = this.root?.let { this.preorder(it).toString() }!!
 }
