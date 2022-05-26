@@ -2,8 +2,8 @@ package algorithms.unbalanced.tree
 
 import algorithms.util.Node
 import java.util.*
-import kotlin.reflect.KFunction1
 import algorithms.interfaces.BinaryTree
+import kotlin.collections.ArrayList
 
 class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     private var root: Node<T>? = null
@@ -11,16 +11,18 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     /*
     Status stuff
      */
-    fun numNodes(root: Node<T>? = this.root): Int {
-        if (root == null)
-            return 0
+    override fun numNodes(): Int = numNodes(this.root)
+
+    private fun numNodes(root: Node<T>? = this.root): Int {
+        if (root == null) return 0
 
         return 1 + numNodes(root.left) + numNodes(root.right)
     }
 
-    fun numLeaves(root: Node<T>? = this.root): Int {
-        if (root == null)
-            return 0
+    override fun numLeaves(): Int = numLeaves(this.root)
+
+    private fun numLeaves(root: Node<T>? = this.root): Int {
+        if (root == null) return 0
 
         if (root.left == null && root.right == null)
             return 1
@@ -28,9 +30,10 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return numLeaves(root.left) + numLeaves(root.right)
     }
 
-    fun numTwoChildren(root: Node<T>? = this.root): Int {
-        if (root == null)
-            return 0
+    override fun numTwoChildren(): Int = numTwoChildren(this.root)
+
+    private fun numTwoChildren(root: Node<T>? = this.root): Int {
+        if (root == null) return 0
 
         var add = 0
 
@@ -40,7 +43,9 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return add + numTwoChildren(root.left) + numTwoChildren(root.right)
     }
 
-    fun numLevels(root: Node<T>? = this.root): Int {
+    override fun numLevels(): Int = numLevels(this.root)
+
+    private fun numLevels(root: Node<T>? = this.root): Int {
         if (root == null)
             return 0
 
@@ -156,37 +161,44 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     /*
     Print stuff
      */
-    fun print(order: KFunction1<Node<T>, ArrayList<T>> = this::preorder) {
-        for (e in root?.let { order(it) }!!)
+    fun print(order: () -> ArrayList<T> = this::preOrder) {
+        for (e in order())
             print("$e ")
         println()
     }
 
-    fun preorder(root: Node<T>): ArrayList<T> {
+    /*
+    Traversal
+     */
+    override fun preOrder(): ArrayList<T> = preOrder(this.root!!)
+    private fun preOrder(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
         root.let { arr.add(it.data) }
-        root.left?.let { preorder(it) }?.let { arr.addAll(it) }
-        root.right?.let { preorder(it) }?.let { arr.addAll(it) }
+        root.left?.let { preOrder(it) }?.let { arr.addAll(it) }
+        root.right?.let { preOrder(it) }?.let { arr.addAll(it) }
         return arr
     }
 
-    fun inorder(root: Node<T>): ArrayList<T> {
+    override fun inOrder(): ArrayList<T> = inOrder(this.root!!)
+    private fun inOrder(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
-        root.left?.let { inorder(it) }?.let { arr.addAll(it) }
+        root.left?.let { inOrder(it) }?.let { arr.addAll(it) }
         root.let { arr.add(it.data) }
-        root.right?.let { inorder(it) }?.let { arr.addAll(it) }
+        root.right?.let { inOrder(it) }?.let { arr.addAll(it) }
         return arr
     }
 
-    fun postorder(root: Node<T>): ArrayList<T> {
+    override fun postOrder(): ArrayList<T> = postOrder(this.root!!)
+    private fun postOrder(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
-        root.left?.let { postorder(it) }?.let { arr.addAll(it) }
-        root.right?.let { postorder(it) }?.let { arr.addAll(it) }
+        root.left?.let { postOrder(it) }?.let { arr.addAll(it) }
+        root.right?.let { postOrder(it) }?.let { arr.addAll(it) }
         root.let { arr.add(it.data) }
         return arr
     }
 
-    fun bfs(root: Node<T>): ArrayList<T> {
+    override fun bfs(): ArrayList<T> = bfs(this.root!!)
+    fun bfs(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
         val queue = LinkedList<Node<T>>()
 
@@ -210,5 +222,11 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return arr
     }
 
-    override fun toString(): String = this.root?.let { this.preorder(it).toString() }!!
+    override fun dfs(): ArrayList<T> = dfs(this.root!!)
+
+    private fun dfs(root: Node<T> = this.root!!): ArrayList<T> {
+        TODO("Not yes implemented")
+    }
+
+    override fun toString(): String = this.root?.let { this.preOrder(it).toString() }!!
 }
