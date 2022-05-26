@@ -1,6 +1,7 @@
 package algorithms.unbalanced.array
 
 import algorithms.interfaces.BinaryTree
+import java.util.Stack
 import kotlin.math.pow
 
 class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
@@ -231,12 +232,73 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
      */
     override fun preOrder(): ArrayList<T> = preOrder(0)
     private fun preOrder(idx: Int = 0): ArrayList<T> {
-        TODO("Need implementation")
+        val arr = ArrayList<T>()
+        if (nextIndexOut(idx) && elements[idx] != null)
+            return arrayListOf(elements[idx]!!)
+
+        val stack = Stack<Int>()
+        stack.add(idx)
+        var i: Int
+
+        while (!stack.isEmpty()) {
+            i = stack.pop()
+
+            if (elements[i] != null)
+                arr.add(elements[i]!!)
+
+            if (nextIndexOut(i)) continue
+
+            if (elements[rightChild(i)] != null)
+                stack.add(rightChild(i))
+            if (elements[leftChild(i)] != null)
+                stack.add(leftChild(i))
+        }
+
+        return arr
     }
 
     override fun inOrder(): ArrayList<T> = inOrder(0)
     private fun inOrder(idx: Int = 0): ArrayList<T> {
-        TODO("Need implementation")
+        val arr = ArrayList<T>()
+        if (nextIndexOut(idx) && elements[idx] != null)
+            return arrayListOf(elements[idx]!!)
+
+        val stack = Stack<Int>()
+        stack.add(idx)
+        var i: Int
+        val done = BooleanArray(nodes) { false }
+        val numNodes = this.numNodes(idx)
+
+        while (!stack.isEmpty()) {
+            i = stack.pop()
+
+            if (nextIndexOut(i)) {
+                done[i] = true
+                arr.add(elements[i]!!)
+                i = parent(i)
+            }
+
+            if (elements[leftChild(i)] != null && !done[leftChild(i)]) {
+                stack.add(leftChild(i))
+                continue
+            }
+
+            if (!done[i]) {
+                arr.add(elements[i]!!)
+                done[i] = true
+            }
+
+            if (elements[rightChild(i)] != null && !done[rightChild(i)]) {
+                stack.add(rightChild(i))
+                continue
+            }
+
+            stack.add(parent(i))
+
+            if (numNodes <= arr.size)
+                return arr
+        }
+        return arr
     }
 
     override fun postOrder(): ArrayList<T> = postOrder(0)
@@ -320,6 +382,7 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
             queue.add(rightChild(idx))
     }
 
+    override fun print() = print(this::preOrder)
     fun print(order: () -> ArrayList<T> = this::preOrder) {
         for (e in order())
             print("$e ")

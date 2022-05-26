@@ -161,6 +161,7 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     /*
     Print stuff
      */
+    override fun print() = print(this::preOrder)
     fun print(order: () -> ArrayList<T> = this::preOrder) {
         for (e in order())
             print("$e ")
