@@ -30,4 +30,5 @@ interface BinaryTree<T> {
     Printing
      */
     fun print()
+    fun println()
 }

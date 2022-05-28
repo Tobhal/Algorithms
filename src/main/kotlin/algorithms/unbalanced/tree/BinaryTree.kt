@@ -161,17 +161,29 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     /*
     Print stuff
      */
-    override fun print() = print(this::preOrder)
-    fun print(order: () -> ArrayList<T> = this::preOrder) {
+    override fun print() = print(this::inOrder)
+    fun print(order: () -> ArrayList<T> = this::inOrder) {
         for (e in order())
             print("$e ")
-        println()
+    }
+
+    override fun println() = println(this::inOrder)
+    fun println(order: () -> ArrayList<T> = this::inOrder) {
+        val o = order()
+        if (o.isEmpty()) {
+            println("")
+            return
+        }
+
+        for (e in o)
+            print("$e ")
+        println("")
     }
 
     /*
     Traversal
      */
-    override fun preOrder(): ArrayList<T> = preOrder(this.root!!)
+    override fun preOrder(): ArrayList<T> = if (root != null) preOrder(this.root!!) else ArrayList()
     private fun preOrder(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
         root.let { arr.add(it.data) }
@@ -180,7 +192,7 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return arr
     }
 
-    override fun inOrder(): ArrayList<T> = inOrder(this.root!!)
+    override fun inOrder(): ArrayList<T> = if (root != null) inOrder(this.root!!) else ArrayList()
     private fun inOrder(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
         root.left?.let { inOrder(it) }?.let { arr.addAll(it) }
@@ -189,7 +201,7 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return arr
     }
 
-    override fun postOrder(): ArrayList<T> = postOrder(this.root!!)
+    override fun postOrder(): ArrayList<T> = if (root != null) postOrder(this.root!!) else ArrayList()
     private fun postOrder(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
         root.left?.let { postOrder(it) }?.let { arr.addAll(it) }
@@ -198,7 +210,7 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return arr
     }
 
-    override fun bfs(): ArrayList<T> = bfs(this.root!!)
+    override fun bfs(): ArrayList<T> = if (root != null) bfs(this.root!!) else ArrayList()
     fun bfs(root: Node<T> = this.root!!): ArrayList<T> {
         val arr = ArrayList<T>()
         val queue = LinkedList<Node<T>>()
@@ -223,11 +235,11 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         return arr
     }
 
-    override fun dfs(): ArrayList<T> = dfs(this.root!!)
+    override fun dfs(): ArrayList<T> = if (root != null) dfs(this.root!!) else ArrayList()
 
     private fun dfs(root: Node<T> = this.root!!): ArrayList<T> {
         TODO("Not yes implemented")
     }
 
-    override fun toString(): String = this.root?.let { this.preOrder(it).toString() }!!
+    override fun toString(): String = this.root?.let { this.inOrder(it).toString() }!!
 }

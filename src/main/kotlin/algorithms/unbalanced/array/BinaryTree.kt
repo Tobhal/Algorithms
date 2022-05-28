@@ -5,11 +5,11 @@ import java.util.Stack
 import kotlin.math.pow
 
 class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
-    private val elements = ArrayList<T?>(1)
+    var elements = ArrayList<T?>(1)
     private var nodes = 1
     private var height = 0
 
-    override fun numNodes(): Int = numNodes(0)
+    override fun numNodes(): Int = numNodes(-1)
 
     private fun numNodes(idx: Int = 0): Int {
         if (indexOut(idx)) return 1
@@ -34,7 +34,6 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     }
 
     override fun numLeaves(): Int = numLeaves(0)
-
 
     private fun numLeaves(idx: Int = 0): Int {
         if (indexOut(idx)) return 1
@@ -106,14 +105,18 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         while (!queue.isEmpty()) {
             current = queue.removeFirst()
 
-            if (nextIndexOut(current)) continue
+            if (indexOut(current)) continue
 
             if (queue.isEmpty() && !nextQueue.isEmpty()) {
                 addChildrenToQueue(current, nextQueue)
 
                 level++
 
-                nextQueue.forEach() {queue.add(it)}
+                print("$level ")
+
+                while (!nextQueue.isEmpty())
+                    queue.add(nextQueue.removeFirst())
+
                 continue
             }
 
@@ -126,7 +129,6 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
     /*
     Add stuff
      */
-
     override fun insert(data: T) = insert(data, 0)
 
     override fun insert(data: List<T>) = data.forEach() {insert(it, 0)}
@@ -153,10 +155,18 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
                 i = leftChild(i)
             else if (elements[i]!! < data)
                 i = rightChild(i)
+            else if (elements[i] == data)
+                return
         }
     }
 
     override fun remove(data: T) {
+        this.remove(data, 0)
+    }
+
+    private fun remove(data: T, idx: Int = 0) {
+        if (elements.size == 0) return
+
         var tmp = 0
 
         // Search for element
@@ -220,11 +230,17 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         }
     }
 
-    private fun increaseLevels() {
-        this.nodes = 2.0.pow(++this.height + 1).toInt() - 1
+    private fun increaseLevels(amount: Int = 1) {
+        this.nodes = 2.0.pow(++this.height + amount).toInt() - 1
 
         for (i in elements.size until nodes)
             elements.add(i, null)
+    }
+
+    fun fitSize() {
+        val newRoot = BinaryTree<T>()
+        newRoot.insert(this.bfs())
+        elements = newRoot.elements
     }
 
     /*
@@ -232,6 +248,8 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
      */
     override fun preOrder(): ArrayList<T> = preOrder(0)
     private fun preOrder(idx: Int = 0): ArrayList<T> {
+        if (elements.isEmpty()) return ArrayList()
+
         val arr = ArrayList<T>()
         if (nextIndexOut(idx) && elements[idx] != null)
             return arrayListOf(elements[idx]!!)
@@ -259,6 +277,8 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
 
     override fun inOrder(): ArrayList<T> = inOrder(0)
     private fun inOrder(idx: Int = 0): ArrayList<T> {
+        if (elements.isEmpty() || elements[0] == null) return ArrayList()
+
         val arr = ArrayList<T>()
         if (nextIndexOut(idx) && elements[idx] != null)
             return arrayListOf(elements[idx]!!)
@@ -303,30 +323,71 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
 
     override fun postOrder(): ArrayList<T> = postOrder(0)
     private fun postOrder(idx: Int = 0): ArrayList<T> {
-        TODO("Need implementation")
+        if (elements.isEmpty() || elements[0] == null) return ArrayList()
+
+        val arr = ArrayList<T>()
+        if (nextIndexOut(idx) && elements[idx] != null)
+            return arrayListOf(elements[idx]!!)
+
+        val stack = Stack<Int>()
+        stack.add(idx)
+        var i: Int
+        val done = BooleanArray(nodes) { false }
+        val numNodes = this.numNodes(idx)
+
+        while (!stack.isEmpty()) {
+            i = stack.pop()
+
+            if (nextIndexOut(i)) {
+                done[i] = true
+                arr.add(elements[i]!!)
+                i = parent(i)
+            }
+
+            if (elements[leftChild(i)] != null && !done[leftChild(i)]) {
+                stack.add(leftChild(i))
+                continue
+            }
+
+            if (elements[rightChild(i)] != null && !done[rightChild(i)]) {
+                stack.add(rightChild(i))
+                continue
+            }
+
+            if (!done[i]) {
+                arr.add(elements[i]!!)
+                done[i] = true
+            }
+
+            stack.add(parent(i))
+
+            if (numNodes <= arr.size)
+                return arr
+        }
+        return arr
     }
 
     override fun bfs(): ArrayList<T> = bfs(0)
-    private fun bfs(idx: Int = 0): ArrayList<T> {
-        if (idx > elements.size) return arrayListOf()
+   private fun bfs(idx: Int = 0): ArrayList<T> {
+       if (idx > elements.size || elements.isEmpty() || elements[0] == null) return arrayListOf()
 
-        val arr = ArrayList<T>()
-        val queue = ArrayDeque<Int>()   // Next index to use
+       val arr = ArrayList<T>()
+       val queue = ArrayDeque<Int>()   // Next index to use
 
-        elements[idx]?.let { arr.add(it) }
+       elements[idx]?.let { arr.add(it) }
 
-        if (nextIndexOut(idx)) return arr
-        addChildrenToQueue(idx, queue)
+       if (nextIndexOut(idx)) return arr
+       addChildrenToQueue(idx, queue)
 
-        var current = idx
+       var current = idx
 
-        while (!queue.isEmpty()) {
-            current = queue.removeFirst()
-            elements[current]?.let { arr.add(it) }
+       while (!queue.isEmpty()) {
+           current = queue.removeFirst()
+           elements[current]?.let { arr.add(it) }
 
-            if (indexOut(current)) continue
-            addChildrenToQueue(current, queue)
-        }
+           if (indexOut(current)) continue
+           addChildrenToQueue(current, queue)
+       }
 
         return arr
     }
@@ -365,7 +426,6 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
             (rightChild(idx) > size)
         )
 
-
     private fun nextIndexOut(idx: Int, size: Int = elements.size, op: (Boolean, Boolean) -> Boolean = Boolean::or): Boolean =
         op (leftChild(idx) > size, rightChild(idx) > size)
 
@@ -382,13 +442,19 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
             queue.add(rightChild(idx))
     }
 
-    override fun print() = print(this::preOrder)
-    fun print(order: () -> ArrayList<T> = this::preOrder) {
+    override fun print() = print(this::inOrder)
+    fun print(order: () -> ArrayList<T> = this::inOrder) {
         for (e in order())
             print("$e ")
-        println()
     }
 
-    override fun toString(): String = bfs().toString()
+    override fun println() = println(this::inOrder)
+    fun println(order: () -> ArrayList<T> = this::inOrder) {
+        for (e in order())
+            print("$e ")
+        println("")
+    }
+
+    override fun toString(): String = inOrder().toString()
 
 }
