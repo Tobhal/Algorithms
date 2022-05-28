@@ -4,15 +4,21 @@ import algorithms.interfaces.BinaryTree
 import java.util.Stack
 import kotlin.math.pow
 
-class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
+class BinaryTree<T: Comparable<T>> (
+    initElements: ArrayList<T> = ArrayList()
+): BinaryTree<T> {
     var elements = ArrayList<T?>(1)
     private var nodes = 1
     private var height = 0
 
-    override fun numNodes(): Int = numNodes(-1)
+    init {
+        initElements.forEach { insert(it) }
+    }
+
+    override fun numNodes(): Int = numNodes(0)
 
     private fun numNodes(idx: Int = 0): Int {
-        if (indexOut(idx)) return 1
+        if (indexOut(idx)) return 0
 
         var sum = 1
         val queue = ArrayDeque<Int>()   // Next index to use
@@ -111,8 +117,6 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
                 addChildrenToQueue(current, nextQueue)
 
                 level++
-
-                print("$level ")
 
                 while (!nextQueue.isEmpty())
                     queue.add(nextQueue.removeFirst())
@@ -424,10 +428,10 @@ class BinaryTree<T: Comparable<T>> : BinaryTree<T> {
         op(
             op(idx > size, (leftChild(idx) > size)),
             (rightChild(idx) > size)
-        )
+        ) || idx < 0
 
     private fun nextIndexOut(idx: Int, size: Int = elements.size, op: (Boolean, Boolean) -> Boolean = Boolean::or): Boolean =
-        op (leftChild(idx) > size, rightChild(idx) > size)
+        op (leftChild(idx) > size, rightChild(idx) > size) || idx < 0
 
     private fun leftChild(idx: Int): Int = 2 * idx + 1
 
