@@ -242,9 +242,7 @@ class BinaryTree<T: Comparable<T>> (
     }
 
     fun fitSize() {
-        val newRoot = BinaryTree<T>()
-        newRoot.insert(this.bfs())
-        elements = newRoot.elements
+        elements = BinaryTree(this.bfs()).elements
     }
 
     /*
@@ -372,7 +370,7 @@ class BinaryTree<T: Comparable<T>> (
     }
 
     override fun bfs(): ArrayList<T> = bfs(0)
-   private fun bfs(idx: Int = 0): ArrayList<T> {
+    private fun bfs(idx: Int = 0): ArrayList<T> {
        if (idx > elements.size || elements.isEmpty() || elements[0] == null) return arrayListOf()
 
        val arr = ArrayList<T>()
