@@ -1,6 +1,6 @@
 use crate::utils::util::Node;
 
-pub mod b_tree;
+pub mod binary_tree;
 
 pub(crate) trait Insert<T> {
     fn insert(&self, data: T);
