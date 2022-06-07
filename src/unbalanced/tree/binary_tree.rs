@@ -34,21 +34,3 @@ impl<T> Counting for BinaryTree<T> {
         todo!()
     }
 }
-
-impl<T> Traversal<T> for BinaryTree<T> {
-    fn pre_order() -> Vec<Node<T>> {
-        todo!()
-    }
-
-    fn in_order() -> Vec<Node<T>> {
-        todo!()
-    }
-
-    fn post_order() -> Vec<Node<T>> {
-        todo!()
-    }
-
-    fn bfs() -> Vec<Node<T>> {
-        todo!()
-    }
-}
