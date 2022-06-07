@@ -5,26 +5,28 @@
 #![allow(non_snake_case)]
 
 use crate::unbalanced::array::binary_tree::BinaryTree;
-use crate::unbalanced::array::Insert;
+use crate::unbalanced::{Counting, Insert};
 use crate::utils::util::Node;
 
 mod unbalanced;
 mod utils;
 
 fn main() {
-    let mut root = BinaryTree {
-        root: vec![Some(8)],
-        nodes: 1,
-        height: 1
-    };
+    let mut root = BinaryTree::new();
 
-    root.insert_vec(0, vec![8, 3, 1, 6, 4, 7, 10, 14, 13, 13]);
+    root.insert_vec(vec![8, 3, 1, 6, 4, 7, 10, 14, 13, 13]);
 
-    for x in root.root {
-        if x != None {
+    for x in &root.root {
+        if *x != None {
             print!("{} ", x.unwrap())
         } else {
             print!("_ ")
         }
     }
+
+    println!();
+    println!("Nodes :       {}", root.num_nodes());
+    println!("Leaves:       {}", root.num_leaves());
+    println!("Two children: {}", root.num_two_children());
+    println!("Levels:       {}", root.num_levels());
 }
