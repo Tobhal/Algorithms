@@ -33,7 +33,8 @@ internal class BinaryTreeTest {
     @Test
     fun insert() {
         val root = BinaryTree(arrayListOf(8, 3, 1, 6, 4, 7, 10, 14, 13, 13))
-        assertArrayEquals(root.inOrder().toArray(), arrayOf(1, 3, 4, 6, 7, 8, 10, 13, 14))
+        println(root.elements.toArray())
+        assertArrayEquals(root.elements.toArray(), arrayOf(8, 3, 10, 1, 6, null, 14, null, null, 4, 7, null, null, 13, null))
     }
 
     @Test
@@ -119,7 +120,7 @@ internal class BinaryTreeTest {
     @Test
     fun postOrder() {
         val root = BinaryTree(arrayListOf(8, 3, 1, 6, 4, 7, 10, 14, 13))
-        assertArrayEquals(root.postOrder().toArray(), arrayOf(1, 4, 7, 6, 3, 13, 14, 10 ,8))
+        assertArrayEquals(root.postOrder().toArray(), arrayOf(1, 4, 7, 6, 3, 13, 14, 10, 8))
     }
 
     @Test

@@ -164,9 +164,7 @@ class BinaryTree<T: Comparable<T>> (
         }
     }
 
-    override fun remove(data: T) {
-        this.remove(data, 0)
-    }
+    override fun remove(data: T) = this.remove(data, 0)
 
     private fun remove(data: T, idx: Int = 0) {
         if (elements.size == 0) return
@@ -228,7 +226,7 @@ class BinaryTree<T: Comparable<T>> (
             if (nextIndexOut(i) || elements[i] == null) return false
 
             i = if (elements[i]!! > data)
-               leftChild(i)
+                leftChild(i)
             else
                 rightChild(i)
         }
@@ -294,29 +292,35 @@ class BinaryTree<T: Comparable<T>> (
         while (!stack.isEmpty()) {
             i = stack.pop()
 
+            // Is the next node outside the array, add parent node to stack
             if (nextIndexOut(i)) {
                 done[i] = true
                 arr.add(elements[i]!!)
                 i = parent(i)
             }
 
+            // Add left child to stack so the value can be added later
             if (elements[leftChild(i)] != null && !done[leftChild(i)]) {
                 stack.add(leftChild(i))
                 continue
             }
 
+            // If node not visited before, add the value to output vector
             if (!done[i]) {
                 arr.add(elements[i]!!)
                 done[i] = true
             }
 
+            // Add right child to stack so the value can be added later
             if (elements[rightChild(i)] != null && !done[rightChild(i)]) {
                 stack.add(rightChild(i))
                 continue
             }
 
+            // Add the parent to the stack to move up the tree
             stack.add(parent(i))
 
+            // If all nodes are visited return the array
             if (numNodes <= arr.size)
                 return arr
         }
@@ -340,29 +344,35 @@ class BinaryTree<T: Comparable<T>> (
         while (!stack.isEmpty()) {
             i = stack.pop()
 
+            // Is the next node outside the array, add parent node to stack
             if (nextIndexOut(i)) {
                 done[i] = true
                 arr.add(elements[i]!!)
                 i = parent(i)
             }
 
+            // Add left child to stack so the value can be added later
             if (elements[leftChild(i)] != null && !done[leftChild(i)]) {
                 stack.add(leftChild(i))
                 continue
             }
 
+            // Add right child to stack so the value can be added later
             if (elements[rightChild(i)] != null && !done[rightChild(i)]) {
                 stack.add(rightChild(i))
                 continue
             }
 
+            // If node not visited before, add the value to output vector
             if (!done[i]) {
                 arr.add(elements[i]!!)
                 done[i] = true
             }
 
+            // Add the parent to the stack to move up the tree
             stack.add(parent(i))
 
+            // If all nodes are visited return the array
             if (numNodes <= arr.size)
                 return arr
         }
