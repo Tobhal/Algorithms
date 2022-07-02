@@ -4,11 +4,11 @@
 #![allow(unused_assignments)]
 #![allow(non_snake_case)]
 
-use crate::unbalanced::array::binary_tree::BinaryTree;
 use crate::unbalanced::{Counting, Insert, Remove, Traversal};
-use crate::unbalanced::array::TraversalFrom;
-use crate::utils::util::Node;
+use crate::unbalanced::array::{InsertAt, TraversalFrom};
+use crate::unbalanced::array::binary_tree::BinaryTree;
 
+mod balanced;
 mod unbalanced;
 mod utils;
 mod tests;
@@ -35,7 +35,7 @@ fn main() {
     println!("\n");
     println!("Order:");
     print!("Pre:  ");
-    for e in root.pre_order_from(2) { print!("{} ", e); }
+    for e in root.pre_order() { print!("{} ", e) }
 
     println!();
     print!("In:   ");
@@ -48,4 +48,8 @@ fn main() {
     println!();
     print!("BFS:  ");
     for e in root.bfs() { print!("{} ", e); }
+
+    println!();
+    print!("Pre from pos 2: ");
+    for e in root.pre_order_from(2) { print!("{} ", e); }
 }
