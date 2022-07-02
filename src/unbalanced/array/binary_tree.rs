@@ -76,30 +76,11 @@ where T: PartialOrd, T: Copy, T: Display {
             return;
         }
 
-        let mut i = 0;
-
-        loop {
-            if i >= self.root.len() {
-                self.increase_levels(1);
-            }
-
-            if self.root[i] == None {
-                self.root[i] = Some(data);
-                return;
-            } else if self.root[i].unwrap() > data {
-                i = self.left_child(i)
-            } else if self.root[i].unwrap() < data {
-                i = self.right_child(i)
-            } else if self.root[i].unwrap() == data {
-                return;
-            }
-        }
+        self.insert_at(0, data);
     }
 
     fn insert_vec(&mut self, data: Vec<T>) {
-        for d in data {
-            self.insert(d)
-        }
+        self.insert_vec_at(0, data)
     }
 }
 
@@ -127,9 +108,11 @@ where T: PartialOrd, T: Copy, T: Display {
     fn remove(&mut self, data: T) {
         if self.root.len() == 0 {return;}
 
+        // Temp index
         let mut tmp: usize = 0;
 
         // Search for element
+        // TODO: Write find function?
         while self.root[tmp] != None && self.root[tmp].unwrap() != data {
             tmp = if self.root[tmp].unwrap() > data {
                 self.left_child(tmp)
@@ -146,6 +129,7 @@ where T: PartialOrd, T: Copy, T: Display {
             } else {
                 if self.root[self.left_child(tmp)] == None && self.root[self.right_child(tmp)] == None {
                     self.root[tmp] = None;
+                    return;
                 }
                 // Case 2 - Delete node with one child
                 else if self.root[self.left_child(tmp)] == None || self.root[self.right_child(tmp)] == None {
@@ -183,13 +167,12 @@ where T: PartialOrd, T: Copy, T: Display {
 impl<T> Util<T> for BinaryTree<T>
 where T: PartialOrd, T: Copy, T: Display {
     fn clear_from(&mut self, idx: usize) {
-        if idx > self.root.len() || self.index_out(idx) {return}
+        if idx > self.root.len() || self.index_out(idx) || self.next_index_out(idx) {return}
 
         let mut index_queue: VecDeque<usize> = VecDeque::new();
 
         self.root[idx] = None;
 
-        if self.next_index_out(idx) {return}
         self.add_children_to_queue(idx, &mut index_queue);
 
         let mut current = idx;
@@ -277,7 +260,8 @@ where T: PartialOrd, T: Copy, T: Display {
     }
 
     fn num_leaves(&self) -> u32 {
-        if self.index_out(0) {return 1;}
+        if self.next_index_out(0) {return 1;}
+        if self.index_out(0) {return 0};
 
         let mut sum: u32 = 0;
         let mut current: usize = 0;
@@ -332,7 +316,8 @@ where T: PartialOrd, T: Copy, T: Display {
     }
 
     fn num_levels(&self) -> u32 {
-        if self.index_out(0) {return 1;}
+        if self.next_index_out(0) {return 1;}
+        if self.index_out(0) {return 0;}
 
         let mut level: u32 = 2;
         let mut current: usize = 0;
