@@ -6,6 +6,7 @@ use std::ptr::null;
 use std::str::ParseBoolError;
 use crate::unbalanced::{Counting, Insert, Traversal, Contains, Remove};
 use crate::unbalanced::array::{InsertAt, TraversalFrom, Util};
+use crate::utils::util::Utility;
 
 pub struct BinaryTree<T>
 where T: PartialOrd, T: Copy, T: Display {
@@ -13,6 +14,8 @@ where T: PartialOrd, T: Copy, T: Display {
     pub(crate) nodes: u32,
     pub(crate) height: u32
 }
+
+crate::impl_utils!(BinaryTree<T: PartialOrd + Copy + Display>);
 
 impl<T> BinaryTree<T>
 where T: PartialOrd, T: Copy, T: Display {
@@ -52,9 +55,9 @@ where T: PartialOrd, T: Copy, T: Display {
                 self.root[i] = Some(data);
                 return;
             } else if self.root[i].unwrap() > data {
-                i = self.left_child(i)
+                i = BinaryTree::<T>::left_child(i)
             } else if self.root[i].unwrap() < data {
-                i = self.right_child(i)
+                i = BinaryTree::<T>::right_child(i)
             } else if self.root[i].unwrap() == data {
                 return;
             }
@@ -95,9 +98,9 @@ where T: PartialOrd, T: Copy, T: Display {
             if self.next_index_out(i) || self.root[i] == None {return false;}
 
             i = if self.root[i].unwrap() > data {
-                self.left_child(i)
+                BinaryTree::<T>::left_child(i)
             } else {
-                self.right_child(i)
+                BinaryTree::<T>::right_child(i)
             };
         }
     }
@@ -115,9 +118,9 @@ where T: PartialOrd, T: Copy, T: Display {
         // TODO: Write find function?
         while self.root[tmp] != None && self.root[tmp].unwrap() != data {
             tmp = if self.root[tmp].unwrap() > data {
-                self.left_child(tmp)
+                BinaryTree::<T>::left_child(tmp)
             } else {
-                self.right_child(tmp)
+                BinaryTree::<T>::right_child(tmp)
             };
         }
 
@@ -127,34 +130,34 @@ where T: PartialOrd, T: Copy, T: Display {
                 self.root[tmp] = None;
                 return;
             } else {
-                if self.root[self.left_child(tmp)] == None && self.root[self.right_child(tmp)] == None {
+                if self.root[BinaryTree::<T>::left_child(tmp)] == None && self.root[BinaryTree::<T>::right_child(tmp)] == None {
                     self.root[tmp] = None;
                     return;
                 }
                 // Case 2 - Delete node with one child
-                else if self.root[self.left_child(tmp)] == None || self.root[self.right_child(tmp)] == None {
-                    if self.root[self.left_child(tmp)] == None {
-                        let el = self.bfs_from(self.right_child(tmp));
+                else if self.root[BinaryTree::<T>::left_child(tmp)] == None || self.root[BinaryTree::<T>::right_child(tmp)] == None {
+                    if self.root[BinaryTree::<T>::left_child(tmp)] == None {
+                        let el = self.bfs_from(BinaryTree::<T>::right_child(tmp));
                         self.clear_from(tmp);
                         self.insert_vec_at(tmp, el);
                     } else {
-                        let el = self.bfs_from(self.left_child(tmp));
+                        let el = self.bfs_from(BinaryTree::<T>::left_child(tmp));
                         self.clear_from(tmp);
                         self.insert_vec_at(tmp, el);
                     }
                 }
                 // Case 3 - Delete Node with 2 children
                 else {
-                    let mut child = self.left_child(tmp);
+                    let mut child = BinaryTree::<T>::left_child(tmp);
                     loop {
-                        if self.right_child(child) > self.root.len() {break;}
+                        if BinaryTree::<T>::right_child(child) > self.root.len() {break;}
 
-                        if self.root[self.right_child(child)] == None {break;}
+                        if self.root[BinaryTree::<T>::right_child(child)] == None {break;}
 
-                        child = self.right_child(child);
+                        child = BinaryTree::<T>::right_child(child);
                     }
-                    let new_childs = self.bfs_from(self.left_child(child));
-                    self.clear_from(self.left_child(child));
+                    let new_childs = self.bfs_from(BinaryTree::<T>::left_child(child));
+                    self.clear_from(BinaryTree::<T>::left_child(child));
                     self.root[tmp] = self.root[child];
                     self.root[child] = None;
                     self.insert_vec_at(child, new_childs);
@@ -183,48 +186,6 @@ where T: PartialOrd, T: Copy, T: Display {
 
             if self.index_out(current) {continue}
             self.add_children_to_queue(current, &mut index_queue);
-        }
-    }
-
-
-    fn index_out(&self, idx: usize) -> bool {
-        self.left_child(idx) > self.root.len() || self.right_child(idx) > self.root.len() || idx > self.root.len()
-    }
-
-    fn next_index_out(&self, idx: usize) -> bool {
-        self.left_child(idx) > self.root.len() || self.right_child(idx) > self.root.len()
-    }
-
-    fn index_out_f(&self, idx: usize, op: fn(bool, bool) -> bool) -> bool {
-        op(
-            op(
-                self.left_child(idx) > self.root.len(), self.right_child(idx) > self.root.len()),
-            usize::from(idx) > self.root.len()
-        )
-    }
-
-    fn next_index_out_f(&self, idx: usize,  op: fn(bool, bool) -> bool) -> bool {
-        op(self.left_child(idx) > self.root.len(), self.right_child(idx) > self.root.len())
-    }
-
-    fn left_child(&self, idx: usize) -> usize {
-        2 * idx + 1
-    }
-
-    fn right_child(&self, idx: usize) -> usize {
-        2 * idx + 2
-    }
-
-    fn parent(&self, idx: usize) -> usize {
-        (idx - 1) / 2
-    }
-
-    fn add_children_to_queue(&self, idx: usize, q: &mut VecDeque<usize>) {
-        if self.root[self.left_child(idx)] != None {
-            q.push_back(self.left_child(idx));
-        }
-        if self.root[self.right_child(idx)] != None {
-            q.push_back(self.right_child(idx));
         }
     }
 
@@ -276,7 +237,7 @@ where T: PartialOrd, T: Copy, T: Display {
                 continue;
             }
 
-            if self.root[self.left_child(current)] == None && self.root[self.right_child(current)] == None {
+            if self.root[BinaryTree::<T>::left_child(current)] == None && self.root[BinaryTree::<T>::right_child(current)] == None {
                 sum += 1;
                 continue;
             }
@@ -290,7 +251,7 @@ where T: PartialOrd, T: Copy, T: Display {
     fn num_two_children(&self) -> u32 {
         if self.index_out(0) {return 0;}
 
-        let mut sum: u32 = if self.root[self.left_child(0)] != None && self.root[self.right_child(0)] != None {
+        let mut sum: u32 = if self.root[BinaryTree::<T>::left_child(0)] != None && self.root[BinaryTree::<T>::right_child(0)] != None {
             1
         } else {
             0
@@ -305,7 +266,7 @@ where T: PartialOrd, T: Copy, T: Display {
 
             if self.index_out(current) {continue;}
 
-            if self.root[self.left_child(current)] != None && self.root[self.right_child(current)] != None {
+            if self.root[BinaryTree::<T>::left_child(current)] != None && self.root[BinaryTree::<T>::right_child(current)] != None {
                 sum += 1;
             }
 
@@ -371,12 +332,12 @@ where T: PartialOrd, T: Copy, T: Display {
 
             if self.next_index_out(i) {continue;}
 
-            if self.root[self.right_child(i)] != None {
-                next_index.push(self.right_child(i));
+            if self.root[BinaryTree::<T>::right_child(i)] != None {
+                next_index.push(BinaryTree::<T>::right_child(i));
             }
 
-            if self.root[self.left_child(i)] != None {
-                next_index.push(self.left_child(i));
+            if self.root[BinaryTree::<T>::left_child(i)] != None {
+                next_index.push(BinaryTree::<T>::left_child(i));
             }
         }
 
@@ -404,12 +365,12 @@ where T: PartialOrd, T: Copy, T: Display {
             if self.next_index_out(idx) {
                 done_idx[idx] = true;
                 return_vec.push(self.root[idx].unwrap());
-                idx = self.parent(idx);
+                idx = BinaryTree::<T>::parent(idx);
             }
 
             // Add left child to stack so the value can be added later
-            if self.root[self.left_child(idx)] != None && !done_idx[self.left_child(idx)] {
-                next_index.push(self.left_child(idx));
+            if self.root[BinaryTree::<T>::left_child(idx)] != None && !done_idx[BinaryTree::<T>::left_child(idx)] {
+                next_index.push(BinaryTree::<T>::left_child(idx));
                 continue;
             }
 
@@ -420,14 +381,14 @@ where T: PartialOrd, T: Copy, T: Display {
             }
 
             // Add right child to stack so the value can be added later
-            if self.root[self.right_child(idx)] != None && !done_idx[self.right_child(idx)] {
-                next_index.push(self.right_child(idx));
+            if self.root[BinaryTree::<T>::right_child(idx)] != None && !done_idx[BinaryTree::<T>::right_child(idx)] {
+                next_index.push(BinaryTree::<T>::right_child(idx));
                 continue;
             }
 
             // Add the parent to the stack to move up the tree
             if idx != 0 {
-                next_index.push(self.parent(idx));
+                next_index.push(BinaryTree::<T>::parent(idx));
             }
 
             // If all nodes are visited return the vector
@@ -458,18 +419,18 @@ where T: PartialOrd, T: Copy, T: Display {
             if self.next_index_out(idx) {
                 done_idx[idx] = true;
                 return_vec.push(self.root[idx].unwrap());
-                idx = self.parent(idx);
+                idx = BinaryTree::<T>::parent(idx);
             }
 
             // Add left child to stack so the value can be added later
-            if self.root[self.left_child(idx)] != None && !done_idx[self.left_child(idx)] {
-                next_index.push(self.left_child(idx));
+            if self.root[BinaryTree::<T>::left_child(idx)] != None && !done_idx[BinaryTree::<T>::left_child(idx)] {
+                next_index.push(BinaryTree::<T>::left_child(idx));
                 continue;
             }
 
             // Add right child to stack so the value can be added later
-            if self.root[self.right_child(idx)] != None && !done_idx[self.right_child(idx)] {
-                next_index.push(self.right_child(idx));
+            if self.root[BinaryTree::<T>::right_child(idx)] != None && !done_idx[BinaryTree::<T>::right_child(idx)] {
+                next_index.push(BinaryTree::<T>::right_child(idx));
                 continue;
             }
 
@@ -481,7 +442,7 @@ where T: PartialOrd, T: Copy, T: Display {
 
             // Add the parent to the stack to move up the tree
             if idx != 0 {
-                next_index.push(self.parent(idx));
+                next_index.push(BinaryTree::<T>::parent(idx));
             }
 
             // If all nodes are visited return the vector
@@ -542,12 +503,12 @@ where T: PartialOrd, T: Copy, T: Display {
 
             if self.next_index_out(i) {continue;}
 
-            if self.root[self.right_child(i)] != None {
-                next_index.push(self.right_child(i));
+            if self.root[BinaryTree::<T>::right_child(i)] != None {
+                next_index.push(BinaryTree::<T>::right_child(i));
             }
 
-            if self.root[self.left_child(i)] != None {
-                next_index.push(self.left_child(i));
+            if self.root[BinaryTree::<T>::left_child(i)] != None {
+                next_index.push(BinaryTree::<T>::left_child(i));
             }
         }
 
@@ -579,12 +540,12 @@ where T: PartialOrd, T: Copy, T: Display {
             if self.next_index_out(i) {
                 done_idx[i] = true;
                 return_vec.push(self.root[i].unwrap());
-                i = self.parent(i);
+                i = BinaryTree::<T>::parent(i);
             }
 
             // Add left child to stack so the value can be added later
-            if self.root[self.left_child(i)] != None && !done_idx[self.left_child(i)] {
-                next_index.push(self.left_child(i));
+            if self.root[BinaryTree::<T>::left_child(i)] != None && !done_idx[BinaryTree::<T>::left_child(i)] {
+                next_index.push(BinaryTree::<T>::left_child(i));
                 continue;
             }
 
@@ -595,14 +556,14 @@ where T: PartialOrd, T: Copy, T: Display {
             }
 
             // Add right child to stack so the value can be added later
-            if self.root[self.right_child(i)] != None && !done_idx[self.right_child(i)] {
-                next_index.push(self.right_child(i));
+            if self.root[BinaryTree::<T>::right_child(i)] != None && !done_idx[BinaryTree::<T>::right_child(i)] {
+                next_index.push(BinaryTree::<T>::right_child(i));
                 continue;
             }
 
             // Add the parent to the stack to move up the tree
             if i > idx {
-                next_index.push(self.parent(i));
+                next_index.push(BinaryTree::<T>::parent(i));
             }
 
             // If all nodes are visited return the vector
@@ -637,18 +598,18 @@ where T: PartialOrd, T: Copy, T: Display {
             if self.next_index_out(i) {
                 done_idx[i] = true;
                 return_vec.push(self.root[i].unwrap());
-                i = self.parent(i);
+                i = BinaryTree::<T>::parent(i);
             }
 
             // Add left child to stack so the value can be added later
-            if self.root[self.left_child(i)] != None && !done_idx[self.left_child(i)] {
-                next_index.push(self.left_child(i));
+            if self.root[BinaryTree::<T>::left_child(i)] != None && !done_idx[BinaryTree::<T>::left_child(i)] {
+                next_index.push(BinaryTree::<T>::left_child(i));
                 continue;
             }
 
             // Add right child to stack so the value can be added later
-            if self.root[self.right_child(i)] != None && !done_idx[self.right_child(i)] {
-                next_index.push(self.right_child(i));
+            if self.root[BinaryTree::<T>::right_child(i)] != None && !done_idx[BinaryTree::<T>::right_child(i)] {
+                next_index.push(BinaryTree::<T>::right_child(i));
                 continue;
             }
 
@@ -660,7 +621,7 @@ where T: PartialOrd, T: Copy, T: Display {
 
             // Add the parent to the stack to move up the tree
             if i > idx {
-                next_index.push(self.parent(i));
+                next_index.push(BinaryTree::<T>::parent(i));
             }
 
             // If all nodes are visited return the vector
