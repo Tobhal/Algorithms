@@ -4,9 +4,10 @@
 #![allow(unused_assignments)]
 #![allow(non_snake_case)]
 
-use crate::unbalanced::{Counting, Insert, Remove, Traversal};
+use crate::unbalanced::{Insert, Remove, Traversal};
 use crate::unbalanced::array::{InsertAt, TraversalFrom};
 use crate::unbalanced::array::binary_tree::BinaryTree;
+use crate::utils::util::{OrderedTraversal, BFS, Counting};
 
 mod balanced;
 mod unbalanced;
