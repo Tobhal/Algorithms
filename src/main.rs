@@ -15,7 +15,7 @@ mod utils;
 mod tests;
 
 fn main() {
-    let mut root = BinaryTree::new();
+    let mut root: BinaryTree<u8> = BinaryTree::new();
 
     root.insert_vec(vec![8, 3, 1, 6, 4, 7, 10, 14, 13, 13]);
 
