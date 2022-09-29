@@ -78,9 +78,9 @@ impl Graph<char> {
         // Read the file
         let file = File::open(filePath)
             .expect(&*format!("Did not fine the file at the given file path: ({filePath})"));
-        let reader = BufReader::new(file);
 
-        let mut lines = reader.lines();
+        let mut lines = BufReader::new(file)
+            .lines();
 
         // Get the number of nodes described in the rest of the file, the first line
         let numNodes: usize = lines
