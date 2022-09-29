@@ -7,7 +7,8 @@
 use crate::unbalanced::{Insert, Remove, Traversal};
 use crate::unbalanced::array::{InsertAt, TraversalFrom};
 use crate::unbalanced::array::binary_tree::BinaryTree;
-use crate::utils::util::{OrderedTraversal, BFS, Counting};
+use crate::unbalanced::array::graph::{Node, Graph};
+use crate::utils::util::{OrderedTraversal, BFS};
 
 mod balanced;
 mod unbalanced;
@@ -15,42 +16,19 @@ mod utils;
 mod tests;
 
 fn main() {
-    let mut root: BinaryTree<u8> = BinaryTree::new();
+    let mut node0 = Node::new(1);
+    let mut node1 = Node::new(2);
+    let mut node2 = Node::new(3);
 
-    root.insert_vec(vec![8, 3, 1, 6, 4, 7, 10, 14, 13, 13]);
+    node0.add_children(vec![(0, 1), (1, 2)]);
+    node1.add_children(vec![(0, 3), (2, 2)]);
+    node2.add_children(vec![(1, 4), (0, 2)]);
 
-    for x in &root.root {
-        if *x != None {
-            print!("{} ", x.unwrap())
-        } else {
-            print!("_ ")
-        }
-    }
+    let mut graph = Graph::new();
+    graph.add_nodes(vec![node0, node1, node2]);
 
-    println!();
-    println!("Nodes :       {}", root.num_nodes());
-    println!("Leaves:       {}", root.num_leaves());
-    println!("Two children: {}", root.num_two_children());
-    println!("Levels:       {}", root.num_levels());
+    let graph2: Graph<char> = Graph::read_file("files/TestGraphData.txt");
 
-    println!("\n");
-    println!("Order:");
-    print!("Pre:  ");
-    for e in root.pre_order() { print!("{} ", e) }
-
-    println!();
-    print!("In:   ");
-    for e in root.in_order() { print!("{} ", e); }
-
-    println!();
-    print!("Post: ");
-    for e in root.post_order() { print!("{} ", e); }
-
-    println!();
-    print!("BFS:  ");
-    for e in root.bfs() { print!("{} ", e); }
-
-    println!();
-    print!("Pre from pos 2: ");
-    for e in root.pre_order_from(2) { print!("{} ", e); }
+    println!("{:#?}\n", graph);
+    println!("{:#?}", graph2);
 }
