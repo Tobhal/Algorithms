@@ -3,3 +3,4 @@ Implementation of diffrent algoritmes implemented with Node(pointer/refrences) a
 
 ## Current algoritmes:
 - BinaryTree (Array)
+- Graph (Array)
