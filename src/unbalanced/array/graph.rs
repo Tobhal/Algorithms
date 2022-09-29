@@ -107,6 +107,7 @@ impl Graph<char> {
             let currentNodeIndex = splitLine[0]
                 .parse::<usize>()
                 .expect("Cant parse the node index. First value of line");
+
             graph.nodes[currentNodeIndex].val = splitLine[1]
                 .parse()
                 .expect("Cant parse node value. Second value of line");
