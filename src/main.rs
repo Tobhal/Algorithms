@@ -4,16 +4,12 @@
 #![allow(unused_assignments)]
 #![allow(non_snake_case)]
 
-use crate::unbalanced::{Insert, Remove, Traversal};
-use crate::unbalanced::array::{InsertAt, TraversalFrom};
-use crate::unbalanced::array::binary_tree::BinaryTree;
-use crate::unbalanced::array::graph::{Node, Graph};
 use crate::utils::util::{OrderedTraversal, BFS};
+use crate::array::graph::{Graph, Node, FileReader};
 
-mod balanced;
-mod unbalanced;
 mod utils;
 mod tests;
+mod array;
 
 fn main() {
     let mut node0 = Node::new(1);

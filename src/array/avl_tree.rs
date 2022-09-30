@@ -1,25 +1,26 @@
 use std::collections::VecDeque;
 use std::fmt::Display;
-use std::intrinsics::rotate_left;
-use crate::{BinaryTree, Insert, InsertAt};
-use crate::unbalanced::array::Util;
-use crate::utils::util::Utility;
+use crate::array::binary_tree::BinaryTree;
+use crate::utils::util::{Utility, Util, Insert, InsertAt};
 
 
 pub struct AVLTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     pub(crate) root: Vec<Option<T>>,
-    pub(crate) balanceFactor: Vec<i8>,
+    pub(crate) balanceFactor: Vec<u32>,
     pub(crate) nodes: u32,
     pub(crate) height: u32
 }
 
+/*
 crate::impl_utils!(AVLTree<T: PartialOrd + Copy + Display>);
 crate::impl_ordered_traversal!(AVLTree<T: PartialOrd + Copy + Display>);
 crate::impl_BFS!(AVLTree<T: PartialOrd + Copy + Display>);
-crate::impl_counting!(AVLTree<T: PartialOrd + Copy + Display>);
+// crate::impl_counting!(AVLTree<T: PartialOrd + Copy + Display>);
+*/
 
-impl AVLTree<T> {
+impl<T> AVLTree<T>
+where T: PartialOrd + Copy + Display {
     fn rotate_left(&self, idx: usize) {
         todo!()
     }
@@ -29,13 +30,14 @@ impl AVLTree<T> {
     }
 }
 
-impl<T> InsertAt<T> for AVLTree<T> {
+impl<T> InsertAt<T> for AVLTree<T>
+where T: PartialOrd + Copy + Display {
     fn insert_at(&mut self, idx: usize, data: T) {
         /*
         Do normal insert
          */
         if self.root.len() == 0 {
-            self.root.push(some(data));
+            self.root.push(Some(data));
             self.balanceFactor[0] = 0;
             return;
         }
@@ -61,10 +63,12 @@ impl<T> InsertAt<T> for AVLTree<T> {
 
         /*
         Update balance factor
+
+        fix later
          */
         self.balanceFactor[i] = 0;
-        let mut prev_data = &data;
-
+        let mut _prev_data = &data;
+        /*
         loop {
             i = BinaryTree::<T>::parent(i);
 
@@ -86,6 +90,7 @@ impl<T> InsertAt<T> for AVLTree<T> {
                 i = AVLTree::<T>::parent(i);
             }
         }
+         */
 
     }
 
@@ -95,7 +100,7 @@ impl<T> InsertAt<T> for AVLTree<T> {
 }
 
 impl<T> Insert<T> for AVLTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn insert(&mut self, data: T) {
         self.insert_at(0, data)
     }
@@ -106,9 +111,9 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Util<T> for AVLTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn clear_from(&mut self, idx: usize) {
-        if idx > self.root.len() || self.
+        todo!()
     }
 
     fn increase_levels(&mut self, amount: u32) {

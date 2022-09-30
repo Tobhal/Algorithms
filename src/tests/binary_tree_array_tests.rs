@@ -1,9 +1,8 @@
 #[cfg(test)]
 mod tests {
-    use crate::{Insert, BinaryTree, Traversal};
-    use crate::unbalanced::array::TraversalFrom;
-    use crate::unbalanced::{Contains, Remove};
-    use crate::utils::util::{OrderedTraversal, BFS, Counting};
+    use crate::array::binary_tree::BinaryTree;
+    use crate::{BFS, OrderedTraversal};
+    use crate::utils::util::{Contains, Counting, Insert, Remove};
 
     #[test]
     fn num_nodes() {

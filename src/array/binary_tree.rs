@@ -4,12 +4,10 @@ use std::fmt::Display;
 use std::ops;
 use std::ptr::null;
 use std::str::ParseBoolError;
-use crate::unbalanced::{Insert, Contains, Remove};
-use crate::unbalanced::array::{InsertAt, Util};
-use crate::utils::util::{Counting, Utility, OrderedTraversal, BFS};
+use crate::utils::util::{Counting, Utility, OrderedTraversal, BFS, Insert, InsertAt, Util, Contains, Remove};
 
 pub struct BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     pub(crate) root: Vec<Option<T>>,
     pub(crate) nodes: u32,
     pub(crate) height: u32
@@ -25,7 +23,7 @@ crate::impl_counting!(BinaryTree<T: PartialOrd + Copy + Display>);
 
 
 impl<T> BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     pub(crate) fn new() -> BinaryTree<T> {
         BinaryTree {
             root: vec![],
@@ -44,7 +42,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Counting for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn num_nodes(&self) -> u32 {
         if self.index_out(0) {return 0;}
         else if self.next_index_out(0) {return 1;}
@@ -156,7 +154,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Utility for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn index_out(&self, idx: usize) -> bool {
         BinaryTree::<T>::left_child(idx) > self.root.len() || BinaryTree::<T>::right_child(idx) > self.root.len() || idx > self.root.len()
     }
@@ -192,7 +190,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> OrderedTraversal<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn pre_order(&self) -> Vec<T> {
         self.pre_order_from(0)
     }
@@ -314,37 +312,37 @@ where T: PartialOrd, T: Copy, T: Display {
                 continue;
             }
 
-// Is next nodes outside the vec, add parent node to stack
+            // Is next nodes outside the vec, add parent node to stack
             if self.next_index_out(i) {
                 done_idx[i] = true;
                 return_vec.push(self.root[i].unwrap());
                 i = BinaryTree::<T>::parent(i);
             }
 
-// Add left child to stack so the value can be added later
+            // Add left child to stack so the value can be added later
             if self.root[BinaryTree::<T>::left_child(i)] != None && !done_idx[BinaryTree::<T>::left_child(i)] {
                 next_index.push(BinaryTree::<T>::left_child(i));
                 continue;
             }
 
-// Add right child to stack so the value can be added later
+            // Add right child to stack so the value can be added later
             if self.root[BinaryTree::<T>::right_child(i)] != None && !done_idx[BinaryTree::<T>::right_child(i)] {
                 next_index.push(BinaryTree::<T>::right_child(i));
                 continue;
             }
 
-// If node not visited before, add the value to output vector
+            // If node not visited before, add the value to output vector
             if !done_idx[i] {
                 return_vec.push(self.root[i].unwrap());
                 done_idx[i] = true;
             }
 
-// Add the parent to the stack to move up the tree
+            // Add the parent to the stack to move up the tree
             if i > idx {
                 next_index.push(BinaryTree::<T>::parent(i));
             }
 
-// If all nodes are visited return the vector
+            // If all nodes are visited return the vector
             if num_nodes <= return_vec.len() {
                 return return_vec;
             }
@@ -355,7 +353,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> InsertAt<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn insert_at(&mut self, idx: usize, data: T) {
         if self.root.len() == 0 {
             self.root.push(Some(data));
@@ -390,7 +388,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Insert<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn insert(&mut self, data: T) {
         if self.root.len() == 0 {
             self.root.push(Some(data));
@@ -406,7 +404,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Contains<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn contains(&self, data: T) -> bool {
         let mut i: usize = 0;
 
@@ -425,7 +423,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Remove<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn remove(&mut self, data: T) {
         if self.root.len() == 0 {return;}
 
@@ -486,7 +484,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> Util<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn clear_from(&mut self, idx: usize) {
         if idx > self.root.len() || self.index_out(idx) || self.next_index_out(idx) {return}
 
@@ -516,7 +514,7 @@ where T: PartialOrd, T: Copy, T: Display {
 }
 
 impl<T> BFS<T> for BinaryTree<T>
-where T: PartialOrd, T: Copy, T: Display {
+where T: PartialOrd + Copy + Display {
     fn bfs(&self) -> Vec<T> {
         self.bfs_from(0)
     }

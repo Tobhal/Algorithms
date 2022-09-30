@@ -1,12 +1,12 @@
 use std::borrow::Borrow;
-use std::fmt::{Debug, Display};
-use std::fs;
+use std::fmt::{Debug, Display, Formatter};
+use std::{fmt, fs};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 #[derive(Debug)]
 pub struct Node<T>
-where T: Clone + Display + Debug {
+where T: Debug {
     pub(crate) val: T,
     pub(crate) children: Vec<(usize, u32)> // child and weight
 }
@@ -33,12 +33,12 @@ where T: Clone + Display + Debug {
 
 #[derive(Debug)]
 pub struct Graph<T>
-where T: PartialOrd + Copy + Display + Debug {
+where T: Debug {
     pub(crate) nodes: Vec<Node<T>>
 }
 
 impl<T> Graph<T>
-where T: PartialOrd + Copy + Display + Debug {
+where T: Copy + Debug {
     pub(crate) fn new() -> Graph<T> {
         Graph {
             nodes: vec![]
@@ -73,8 +73,13 @@ where T: PartialOrd + Copy + Display + Debug {
     }
 }
 
-impl Graph<char> {
-    pub(crate) fn read_file(filePath: &str) -> Graph<char> {
+pub(crate) trait FileReader<T>
+where T: Debug {
+    fn read_file(filePath: &str) -> Graph<T>;
+}
+
+impl FileReader<char> for Graph<char> {
+    fn read_file(filePath: &str) -> Graph<char> {
         // Read the file
         let file = File::open(filePath)
             .expect(&*format!("Did not fine the file at the given file path: ({filePath})"));
@@ -124,7 +129,12 @@ impl Graph<char> {
     }
 }
 
-
+impl<T> Display for Graph<T>
+where T: Debug {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        todo!()
+    }
+}
 
 
 
