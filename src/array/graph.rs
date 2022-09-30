@@ -102,6 +102,7 @@ where T: Debug {
 impl FileReader<char> for Graph<char> {
     fn read_file(filePath: &str) -> Graph<char> {
         // Read the file
+        // Refactor to send a resoult and not just Graph?
         let file = File::open(filePath)
             .expect(&*format!("Did not fine the file at the given file path: ({filePath})"));
 
@@ -142,7 +143,10 @@ impl FileReader<char> for Graph<char> {
             for i in 3..splitLine[2]
                 .parse::<usize>()
                 .expect("Cant parse number of child nodes. Third value of line") + 3 {
-                graph.nodes[currentNodeIndex].add_child(Child::new(i, 0));
+                graph.nodes[currentNodeIndex]
+                    .add_child(Child::new(splitLine[i]
+                                              .parse::<usize>()
+                                              .expect(&*format!("Could not parse ({}) to usize", splitLine[i])), 0));
             }
         }
 
@@ -151,18 +155,42 @@ impl FileReader<char> for Graph<char> {
 }
 
 impl<T> Display for Graph<T>
-where T: Debug + Display {
+where T: Debug + Display + PartialOrd {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+
         let mut s = String::new();
 
         s += &*self.nodes.len().to_string();
+        let indexWidth = s.len();
+
+        let mut childWidth = 0;
+        let mut valWitdth = 0;
+
+        for node in self.nodes.iter() {
+            childWidth = if node.children.len().to_string().len() > childWidth {
+                node.children.len().to_string().len()
+            } else {
+                childWidth
+            };
+
+            valWitdth = if node.val.to_string().len() > valWitdth {
+                node.val.to_string().len()
+            } else {
+                valWitdth
+            }
+        }
+
         s += "\n";
 
         for (i, node) in self.nodes.iter().enumerate() {
-            s += &*format!("{} {} {}    ", i, node.val, node.children.len());
+            s += &*format!("{:indexWidth$} {:childWidth$} {:valWidth$}    ",
+                           i, node.val, node.children.len(),
+                           indexWidth = indexWidth,
+                           childWidth = childWidth,
+                           valWidth = valWitdth);
 
             for child in node.children.iter() {
-                s += &*format!("{} ", child.idx)
+                s += &*format!("{:width$} ", child.idx, width = indexWidth);
             }
             s += "\n";
         }
@@ -170,7 +198,6 @@ where T: Debug + Display {
         write!(f, "{s}")
     }
 }
-
 
 
 
