@@ -4,27 +4,48 @@ use std::{fmt, fs};
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+#[derive(Debug, Copy)]
+pub struct Child {
+    idx: usize,
+    weight: u32
+}
+
+impl Clone for Child {
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+
+impl Child {
+    pub(crate) fn new(idx: usize, weight: u32) -> Child {
+        Child {
+            idx,
+            weight
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Node<T>
 where T: Debug {
     pub(crate) val: T,
-    pub(crate) children: Vec<(usize, u32)> // child and weight
+    pub(crate) children: Vec<Child> // child and weight
 }
 
 impl<T> Node<T>
 where T: Clone + Display + Debug {
-    pub(crate) fn new(value: T) -> Node<T> {
+    pub(crate) fn new(val: T) -> Node<T> {
         Node {
-            val: value,
+            val,
             children: vec![]
         }
     }
 
-    pub(crate) fn add_child(&mut self, node: (usize, u32)) {
+    pub(crate) fn add_child(&mut self, node: Child) {
         self.children.push(node);
     }
 
-    pub(crate) fn add_children(&mut self, nodes: Vec<(usize, u32)>) {
+    pub(crate) fn add_children(&mut self, nodes: Vec<Child>) {
         for node in nodes {
             self.add_child(node);
         }
@@ -121,7 +142,7 @@ impl FileReader<char> for Graph<char> {
             for i in 3..splitLine[2]
                 .parse::<usize>()
                 .expect("Cant parse number of child nodes. Third value of line") + 3 {
-                graph.nodes[currentNodeIndex].add_child((i, 0));
+                graph.nodes[currentNodeIndex].add_child(Child::new(i, 0));
             }
         }
 
@@ -130,9 +151,23 @@ impl FileReader<char> for Graph<char> {
 }
 
 impl<T> Display for Graph<T>
-where T: Debug {
+where T: Debug + Display {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        todo!()
+        let mut s = String::new();
+
+        s += &*self.nodes.len().to_string();
+        s += "\n";
+
+        for (i, node) in self.nodes.iter().enumerate() {
+            s += &*format!("{} {} {}    ", i, node.val, node.children.len());
+
+            for child in node.children.iter() {
+                s += &*format!("{} ", child.idx)
+            }
+            s += "\n";
+        }
+
+        write!(f, "{s}")
     }
 }
 

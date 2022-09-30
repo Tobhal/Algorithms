@@ -23,7 +23,7 @@ mod tests {
             vec![0]
         ];
 
-        let mut graph: Graph<char> = Graph::new_with_size(5);
+        let mut graph: Graph<char> = Graph::new_with_size(5, ' ');
 
         for i in 0..5 {
             graph.add_node(
@@ -31,6 +31,5 @@ mod tests {
             )
         }
 
-        println!("{:#?}", graph);
     }
 }
