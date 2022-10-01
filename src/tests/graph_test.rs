@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::{Graph, Node};
+    use crate::{Child, Graph, Node};
 
     #[test]
     fn basic_insertion() {
@@ -30,6 +30,57 @@ mod tests {
                 Node::new(values[i])
             )
         }
+    }
 
+    fn gen_graph() -> Graph<u8> {
+        Graph {
+            nodes: vec![
+                Node::new_with_children(1, vec![
+                    Child::new(1),
+                    Child::new(4)
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(0),
+                    Child::new(2),
+                    Child::new(5)
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(0),
+                    Child::new(4),
+                    Child::new(6)
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(1),
+                    Child::new(7),
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(2),
+                    Child::new(7)
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(3),
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(2),
+                    Child::new(6),
+                ]),
+                Node::new_with_children(1, vec![
+                    Child::new(5),
+                ])
+            ],
+            weighted: false
+        }
+    }
+
+    #[test]
+    fn bfs() {
+        let graph = gen_graph();
+        println!("{graph}");
+    }
+
+    #[test]
+    fn dfs() {
+        let graph = gen_graph();
+        println!("{graph}");
     }
 }
