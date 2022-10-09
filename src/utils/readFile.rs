@@ -4,7 +4,7 @@ use std::io::{BufRead, BufReader};
 use crate::{Child, Graph};
 
 pub(crate) trait FileReader<T>
-    where T: Debug {
+    where T: Debug + Ord {
     fn read_file(filePath: &str, weighted: bool) -> Graph<T>;
 }
 
@@ -77,7 +77,6 @@ impl FileReader<char> for Graph<char> {
                                               .expect(&*format!("Could not parse ({}) to usize", splitLine[3+(i * multiply)])), weight));
             }
         }
-
 
         graph
     }

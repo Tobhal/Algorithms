@@ -34,6 +34,8 @@ fn main() {
 
     let graph2: Graph<String> = Graph::read_file("files/TestGraphDataV2.txt", true);
 
-    println!("{graph1}");
-    println!("{graph2}");
+    // println!("{graph1}");
+    // println!("{graph2}");
+
+    println!("{:#?}", graph2.dfs(0));
 }

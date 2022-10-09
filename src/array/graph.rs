@@ -1,9 +1,13 @@
 use std::borrow::Borrow;
 use std::fmt::{Debug, Display, Formatter};
 use std::{fmt, fs};
+use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
+/*
+Child
+ */
 #[derive(Debug, Copy)]
 pub struct Child {
     idx: usize,
@@ -40,6 +44,9 @@ impl Child {
     }
 }
 
+/*
+Node
+ */
 #[derive(Debug)]
 pub struct Node<T>
 where T: Debug {
@@ -74,6 +81,9 @@ where T: Debug {
     }
 }
 
+/*
+Graph
+ */
 #[derive(Debug)]
 pub struct Graph<T>
 where T: Debug {
@@ -185,17 +195,41 @@ where T: Debug + Display {
 
 impl<T> Graph<T>
 where T: Debug {
-    pub(crate) fn BFS(&self) -> Vec<usize> {
-        todo!()
-    }
+    pub(crate) fn dfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
+        let mut stack: VecDeque<usize> = VecDeque::new();
+        let mut visited: Vec<bool> = vec![false; self.nodes.len()];
 
-    pub(crate) fn DFS(&self) -> Vec<usize> {
-        todo!()
+        self.nodes[fromIndex].children.iter()
+            .for_each(|c| stack.push_back(c.idx));
+
+        while !stack.is_empty() {
+            let mut currentNode = stack.pop_front().unwrap();
+
+            if !visited[currentNode] {
+                visited[currentNode] = false;
+
+                println!("{:?}", self.nodes[currentNode].children);
+
+                let nextNode = self.nodes[currentNode].children.iter()
+                    .filter(|c| !visited[c.idx])
+                    .next();
+
+                if nextNode.is_none() {
+                    currentNode = stack.pop_front().unwrap();
+                } else {
+                    currentNode = nextNode.unwrap().idx;
+                }
+            } else {
+                currentNode = stack.pop_front().unwrap();
+            }
+
+
+            println!("{currentNode}");
+        }
+
+        vec![]
     }
 }
-
-
-
 
 
 

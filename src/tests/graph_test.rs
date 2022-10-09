@@ -36,33 +36,29 @@ mod tests {
         Graph {
             nodes: vec![
                 Node::new_with_children(1, vec![
-                    Child::new(1),
+                    Child::new(3),
                     Child::new(4)
                 ]),
                 Node::new_with_children(1, vec![
                     Child::new(0),
-                    Child::new(2),
+                    Child::new(3),
                     Child::new(5)
                 ]),
                 Node::new_with_children(1, vec![
-                    Child::new(0),
-                    Child::new(4),
-                    Child::new(6)
-                ]),
-                Node::new_with_children(1, vec![
                     Child::new(1),
-                    Child::new(7),
+                    Child::new(6),
                 ]),
                 Node::new_with_children(1, vec![
-                    Child::new(2),
+                    Child::new(5)
+                ]),
+                Node::new_with_children(1, vec![
                     Child::new(7)
                 ]),
                 Node::new_with_children(1, vec![
-                    Child::new(3),
+                    Child::new(1),
                 ]),
                 Node::new_with_children(1, vec![
-                    Child::new(2),
-                    Child::new(6),
+                    Child::new(5),
                 ]),
                 Node::new_with_children(1, vec![
                     Child::new(5),
