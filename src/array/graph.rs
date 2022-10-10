@@ -197,14 +197,14 @@ impl<T> Graph<T>
 where T: Debug {
     pub(crate) fn dfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
         let mut parent: VecDeque<usize> = VecDeque::new();
+        let mut out: Vec<&Node<T>> = vec![&self.nodes[fromIndex]];
         let mut visited: Vec<bool> = vec![false; self.nodes.len()];
-        let mut out: Vec<&Node<T>> = vec![];
 
-        out.push(&self.nodes[fromIndex]);
+        parent.reserve(self.nodes.len());
+        out.reserve(self.nodes.len());
         visited[fromIndex] = true;
 
         let mut currentNode = fromIndex;
-        let mut i = 0;
 
         'outer: loop {
             // loop through all children to the current node
@@ -223,24 +223,16 @@ where T: Debug {
                     // add child node to output
                     out.push(&self.nodes[currentNode]);
 
-                    // start loop again
+                    // continue loop
                     continue 'outer;
                 }
-
-
             }
 
-            if parent.is_empty() {
-                break;
+            // there are no childs, move back to parent, or break out of loop
+            match parent.pop_back() {
+                Some(V) => currentNode = V,
+                None => {break;}
             }
-
-            // there are no childs, move back to parent
-            currentNode = parent.pop_back().unwrap();
-
-            if i > 100 {
-                break;
-            }
-            i += 1;
         }
 
         out

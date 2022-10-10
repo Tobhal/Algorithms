@@ -32,12 +32,17 @@ fn main() {
 
     graph1.weighted = true;
 
-    let graph2: Graph<String> = Graph::read_file("files/TestGraphDataV1.txt", true);
+    let graph2: Graph<String> = Graph::read_file("files/TestGraphDataV1.txt", false);
 
     // println!("{graph1}");
     // println!("{graph2}");
 
-    graph2.dfs(0).iter().for_each(|e| print!("{:?} ", e.val));
+    for i in 0..graph2.nodes.len() {
+        print!("{i}: ");
+        graph2.dfs(i).iter().for_each(|e| print!("{:?} ", e.val));
+        println!();
+    }
+
 
     // println!("{:#?}", graph2.dfs(0));
 }
