@@ -196,38 +196,54 @@ where T: Debug + Display {
 impl<T> Graph<T>
 where T: Debug {
     pub(crate) fn dfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
-        let mut stack: VecDeque<usize> = VecDeque::new();
+        let mut parent: VecDeque<usize> = VecDeque::new();
         let mut visited: Vec<bool> = vec![false; self.nodes.len()];
+        let mut out: Vec<&Node<T>> = vec![];
 
-        self.nodes[fromIndex].children.iter()
-            .for_each(|c| stack.push_back(c.idx));
+        out.push(&self.nodes[fromIndex]);
+        visited[fromIndex] = true;
 
-        while !stack.is_empty() {
-            let mut currentNode = stack.pop_front().unwrap();
+        let mut currentNode = fromIndex;
+        let mut i = 0;
 
-            if !visited[currentNode] {
-                visited[currentNode] = false;
+        'outer: loop {
+            // loop through all children to the current node
+            for c in self.nodes[currentNode].children.iter() {
+                // check if not the child is already visited
+                if !visited[c.idx] {
+                    // register as visited
+                    visited[c.idx] = true;
 
-                println!("{:?}", self.nodes[currentNode].children);
+                    // add parent to parent stack
+                    parent.push_back(currentNode);
 
-                let nextNode = self.nodes[currentNode].children.iter()
-                    .filter(|c| !visited[c.idx])
-                    .next();
+                    // add child node as current node
+                    currentNode = c.idx;
 
-                if nextNode.is_none() {
-                    currentNode = stack.pop_front().unwrap();
-                } else {
-                    currentNode = nextNode.unwrap().idx;
+                    // add child node to output
+                    out.push(&self.nodes[currentNode]);
+
+                    // start loop again
+                    continue 'outer;
                 }
-            } else {
-                currentNode = stack.pop_front().unwrap();
+
+
             }
 
+            if parent.is_empty() {
+                break;
+            }
 
-            println!("{currentNode}");
+            // there are no childs, move back to parent
+            currentNode = parent.pop_back().unwrap();
+
+            if i > 100 {
+                break;
+            }
+            i += 1;
         }
 
-        vec![]
+        out
     }
 }
 
