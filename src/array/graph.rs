@@ -237,6 +237,32 @@ where T: Debug {
 
         out
     }
+
+    pub(crate) fn bfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
+        let mut childs: VecDeque<usize> = VecDeque::new();
+        let mut out: Vec<&Node<T>> = vec![];
+        let mut visited: Vec<bool> = vec![false; self.nodes.len()];
+
+        let mut currentNode: usize = fromIndex;
+
+        loop {
+            if !visited[currentNode] {
+                self.nodes[currentNode].children.iter()
+                    .filter(|c| !visited[c.idx])
+                    .for_each(|c| childs.push_front(c.idx));
+
+                visited[currentNode] = true;
+                out.push(&self.nodes[currentNode]);
+            }
+
+            match childs.pop_back() {
+                Some(V) => currentNode = V,
+                None => {break;}
+            }
+        }
+
+        out
+    }
 }
 
 
