@@ -1,7 +1,7 @@
 use std::fmt::Debug;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use crate::{Child, Graph};
+use crate::array::graph::{Child, Graph};
 
 pub(crate) trait FileReader<T>
     where T: Debug + Ord {

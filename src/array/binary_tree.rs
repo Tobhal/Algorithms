@@ -4,7 +4,6 @@ use std::fmt::Display;
 use std::ops;
 use std::ptr::null;
 use std::str::ParseBoolError;
-use crate::Node;
 use crate::utils::util::{
     Counting, Utility, OrderedTraversal, BFS, Insert, InsertAt, Util, Contains, Remove
 };
@@ -437,7 +436,7 @@ where T: PartialOrd + Copy {
         if self.root.len() == 0 {return;}
 
         // Search for element, if not found just retorn
-        let mut tmp = match self.find(data) {
+        let tmp = match self.find(data) {
             Ok(val) => val,
             Err(_) => {return;}
         };
