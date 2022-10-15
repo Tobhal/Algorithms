@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::{Child, Graph, Node};
+    use crate::array::graph::{Child, Graph, Node};
 
     #[test]
     fn basic_insertion() {
