@@ -4,10 +4,12 @@ use std::fmt::Display;
 use std::ops;
 use std::ptr::null;
 use std::str::ParseBoolError;
-use crate::utils::util::{Counting, Utility, OrderedTraversal, BFS, Insert, InsertAt, Util, Contains, Remove};
+use crate::Node;
+use crate::utils::util::{
+    Counting, Utility, OrderedTraversal, BFS, Insert, InsertAt, Util, Contains, Remove
+};
 
-pub struct BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+pub struct BinaryTree<T> {
     pub(crate) root: Vec<Option<T>>,
     pub(crate) nodes: u32,
     pub(crate) height: u32
@@ -20,10 +22,7 @@ crate::impl_BFS!(BinaryTree<T: PartialOrd + Copy + Display>);
 crate::impl_counting!(BinaryTree<T: PartialOrd + Copy + Display>);
  */
 
-
-
-impl<T> BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+impl<T> BinaryTree<T> {
     pub(crate) fn new() -> BinaryTree<T> {
         BinaryTree {
             root: vec![],
@@ -39,10 +38,11 @@ where T: PartialOrd + Copy + Display {
             height: 1
         }
     }
+
 }
 
 impl<T> Counting for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn num_nodes(&self) -> u32 {
         if self.index_out(0) {return 0;}
         else if self.next_index_out(0) {return 1;}
@@ -154,7 +154,7 @@ where T: PartialOrd + Copy + Display {
 }
 
 impl<T> Utility for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn index_out(&self, idx: usize) -> bool {
         BinaryTree::<T>::left_child(idx) > self.root.len() || BinaryTree::<T>::right_child(idx) > self.root.len() || idx > self.root.len()
     }
@@ -190,7 +190,7 @@ where T: PartialOrd + Copy + Display {
 }
 
 impl<T> OrderedTraversal<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn pre_order(&self) -> Vec<T> {
         self.pre_order_from(0)
     }
@@ -251,37 +251,37 @@ where T: PartialOrd + Copy + Display {
                 continue;
             }
 
-// Is next nodes outside the vec, add parent node to stack
+            // Is next nodes outside the vec, add parent node to stack
             if self.next_index_out(i) {
                 done_idx[i] = true;
                 return_vec.push(self.root[i].unwrap());
                 i = BinaryTree::<T>::parent(i);
             }
 
-// Add left child to stack so the value can be added later
+            // Add left child to stack so the value can be added later
             if self.root[BinaryTree::<T>::left_child(i)] != None && !done_idx[BinaryTree::<T>::left_child(i)] {
                 next_index.push(BinaryTree::<T>::left_child(i));
                 continue;
             }
 
-// If node not visited before, add the value to output vector
+            // If node not visited before, add the value to output vector
             if !done_idx[i] {
                 return_vec.push(self.root[i].unwrap());
                 done_idx[i] = true;
             }
 
-// Add right child to stack so the value can be added later
+            // Add right child to stack so the value can be added later
             if self.root[BinaryTree::<T>::right_child(i)] != None && !done_idx[BinaryTree::<T>::right_child(i)] {
                 next_index.push(BinaryTree::<T>::right_child(i));
                 continue;
             }
 
-// Add the parent to the stack to move up the tree
+            // Add the parent to the stack to move up the tree
             if i > idx {
                 next_index.push(BinaryTree::<T>::parent(i));
             }
 
-// If all nodes are visited return the vector
+            // If all nodes are visited return the vector
             if num_nodes <= return_vec.len() {return return_vec;}
         }
 
@@ -353,7 +353,7 @@ where T: PartialOrd + Copy + Display {
 }
 
 impl<T> InsertAt<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn insert_at(&mut self, idx: usize, data: T) {
         if self.root.len() == 0 {
             self.root.push(Some(data));
@@ -370,13 +370,11 @@ where T: PartialOrd + Copy + Display {
             if self.root[i] == None {
                 self.root[i] = Some(data);
                 return;
-            } else if self.root[i].unwrap() > data {
-                i = BinaryTree::<T>::left_child(i)
-            } else if self.root[i].unwrap() < data {
-                i = BinaryTree::<T>::right_child(i)
             } else if self.root[i].unwrap() == data {
                 return;
             }
+
+            i = self.get_child(i, data).unwrap();
         }
     }
 
@@ -388,7 +386,7 @@ where T: PartialOrd + Copy + Display {
 }
 
 impl<T> Insert<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn insert(&mut self, data: T) {
         if self.root.len() == 0 {
             self.root.push(Some(data));
@@ -404,7 +402,7 @@ where T: PartialOrd + Copy + Display {
 }
 
 impl<T> Contains<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn contains(&self, data: T) -> bool {
         let mut i: usize = 0;
 
@@ -413,79 +411,83 @@ where T: PartialOrd + Copy + Display {
 
             if self.next_index_out(i) || self.root[i] == None {return false;}
 
-            i = if self.root[i].unwrap() > data {
-                BinaryTree::<T>::left_child(i)
-            } else {
-                BinaryTree::<T>::right_child(i)
-            };
+            i = self.get_child(i, data).unwrap();
         }
+    }
+
+    fn find(&self, data: T) -> Result<usize, String> {
+        let mut tmp = 0;
+
+        while self.root[tmp] != None && self.root[tmp].unwrap() != data {
+            tmp = match self.get_child(tmp, data) {
+                Err(e) => {return Err(e)},
+                Ok(val) => {
+                    val
+                }
+            }
+        }
+
+        Ok(tmp)
     }
 }
 
 impl<T> Remove<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn remove(&mut self, data: T) {
         if self.root.len() == 0 {return;}
 
-        // Temp index
-        let mut tmp: usize = 0;
+        // Search for element, if not found just retorn
+        let mut tmp = match self.find(data) {
+            Ok(val) => val,
+            Err(_) => {return;}
+        };
 
-        // Search for element
-        // TODO: Write find function?
-        while self.root[tmp] != None && self.root[tmp].unwrap() != data {
-            tmp = if self.root[tmp].unwrap() > data {
-                BinaryTree::<T>::left_child(tmp)
-            } else {
-                BinaryTree::<T>::right_child(tmp)
-            };
-        }
+        if self.root[tmp] == None {return;}
 
-        if self.root[tmp] != None {
-            // Case 1 - Delete leaf Node
-            if self.next_index_out(tmp) {
+        // Case 1 - Delete leaf Node
+        if self.next_index_out(tmp) {
+            self.root[tmp] = None;
+            return;
+        } else {
+            if self.root[BinaryTree::<T>::left_child(tmp)] == None && self.root[BinaryTree::<T>::right_child(tmp)] == None {
                 self.root[tmp] = None;
                 return;
-            } else {
-                if self.root[BinaryTree::<T>::left_child(tmp)] == None && self.root[BinaryTree::<T>::right_child(tmp)] == None {
-                    self.root[tmp] = None;
-                    return;
+            }
+            // Case 2 - Delete node with one child
+            else if self.root[BinaryTree::<T>::left_child(tmp)] == None || self.root[BinaryTree::<T>::right_child(tmp)] == None {
+                if self.root[BinaryTree::<T>::left_child(tmp)] == None {
+                    let el = self.bfs_from(BinaryTree::<T>::right_child(tmp));
+                    self.clear_from(tmp);
+                    self.insert_vec_at(tmp, el);
+                } else {
+                    let el = self.bfs_from(BinaryTree::<T>::left_child(tmp));
+                    self.clear_from(tmp);
+                    self.insert_vec_at(tmp, el);
                 }
-                // Case 2 - Delete node with one child
-                else if self.root[BinaryTree::<T>::left_child(tmp)] == None || self.root[BinaryTree::<T>::right_child(tmp)] == None {
-                    if self.root[BinaryTree::<T>::left_child(tmp)] == None {
-                        let el = self.bfs_from(BinaryTree::<T>::right_child(tmp));
-                        self.clear_from(tmp);
-                        self.insert_vec_at(tmp, el);
-                    } else {
-                        let el = self.bfs_from(BinaryTree::<T>::left_child(tmp));
-                        self.clear_from(tmp);
-                        self.insert_vec_at(tmp, el);
-                    }
-                }
-                // Case 3 - Delete Node with 2 children
-                else {
-                    let mut child = BinaryTree::<T>::left_child(tmp);
-                    loop {
-                        if BinaryTree::<T>::right_child(child) > self.root.len() {break;}
+            }
+            // Case 3 - Delete Node with 2 children
+            else {
+                let mut child = BinaryTree::<T>::left_child(tmp);
+                loop {
+                    if BinaryTree::<T>::right_child(child) > self.root.len() {break;}
 
-                        if self.root[BinaryTree::<T>::right_child(child)] == None {break;}
+                    if self.root[BinaryTree::<T>::right_child(child)] == None {break;}
 
-                        child = BinaryTree::<T>::right_child(child);
-                    }
-                    let new_childs = self.bfs_from(BinaryTree::<T>::left_child(child));
-                    self.clear_from(BinaryTree::<T>::left_child(child));
-                    self.root[tmp] = self.root[child];
-                    self.root[child] = None;
-                    self.insert_vec_at(child, new_childs);
+                    child = BinaryTree::<T>::right_child(child);
                 }
+                let new_childs = self.bfs_from(BinaryTree::<T>::left_child(child));
+                self.clear_from(BinaryTree::<T>::left_child(child));
+                self.root[tmp] = self.root[child];
+                self.root[child] = None;
+                self.insert_vec_at(child, new_childs);
             }
         }
     }
 }
 
 impl<T> Util<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
-    fn clear_from(&mut self, idx: usize) {
+where T: PartialOrd + Copy {
+    fn clear_from(self: &mut BinaryTree<T>, idx: usize) {
         if idx > self.root.len() || self.index_out(idx) || self.next_index_out(idx) {return}
 
         let mut index_queue: VecDeque<usize> = VecDeque::new();
@@ -511,10 +513,23 @@ where T: PartialOrd + Copy + Display {
 
         self.root.resize_with(self.nodes as usize, || None)
     }
+
+    fn get_child(&self, idx: usize, data: T) -> Result<usize, String> {
+         match self.root[idx] {
+            None => { Err("No node found".to_string()) }
+            Some(val) => {
+                if val > data {
+                    Ok(BinaryTree::<T>::left_child(idx))
+                } else {
+                    Ok(BinaryTree::<T>::right_child(idx))
+                }
+            }
+        }
+    }
 }
 
 impl<T> BFS<T> for BinaryTree<T>
-where T: PartialOrd + Copy + Display {
+where T: PartialOrd + Copy {
     fn bfs(&self) -> Vec<T> {
         self.bfs_from(0)
     }

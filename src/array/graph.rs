@@ -11,7 +11,7 @@ Child
 #[derive(Debug, Copy)]
 pub struct Child {
     idx: usize,
-    weight: u32
+    weight: u32,
 }
 
 impl Clone for Child {
@@ -31,7 +31,7 @@ impl Child {
     pub(crate) fn new_with_weight(idx: usize, weight: u32) -> Child {
         Child {
             idx,
-            weight
+            weight,
         }
     }
 
@@ -173,7 +173,6 @@ where T: Debug + Display {
         }
 
         valWidth += 1;
-
         s += "\n";
 
         for (i, node) in self.nodes.iter().enumerate() {
@@ -186,6 +185,7 @@ where T: Debug + Display {
             for child in node.children.iter() {
                 s += &*format!("{:width$} ", child.getCleanValue(self.weighted), width = indexWidth + childWidth);
             }
+
             s += "\n";
         }
 
@@ -231,17 +231,18 @@ where T: Debug {
             // there are no childs, move back to parent, or break out of loop
             match parent.pop_back() {
                 Some(V) => currentNode = V,
-                None => {break;}
+                None => return out
             }
         }
-
-        out
     }
 
     pub(crate) fn bfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
         let mut childs: VecDeque<usize> = VecDeque::new();
         let mut out: Vec<&Node<T>> = vec![];
         let mut visited: Vec<bool> = vec![false; self.nodes.len()];
+
+        childs.reserve(self.nodes.len());
+        out.reserve(self.nodes.len());
 
         let mut currentNode: usize = fromIndex;
 
@@ -257,11 +258,9 @@ where T: Debug {
 
             match childs.pop_back() {
                 Some(V) => currentNode = V,
-                None => {break;}
+                None => return out
             }
         }
-
-        out
     }
 }
 

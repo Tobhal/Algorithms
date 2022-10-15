@@ -11,6 +11,7 @@ use crate::utils::readFile::FileReader;
 mod utils;
 mod tests;
 mod array;
+mod examples;
 
 fn main() {
     let mut node0 = Node::new("kake");
@@ -32,7 +33,7 @@ fn main() {
 
     graph1.weighted = true;
 
-    let graph2: Graph<String> = Graph::read_file("files/TestGraphDataV1.txt", true);
+    let graph2: Graph<String> = Graph::read_file("src/files/TestGraphDataV2.txt", true);
 
     // println!("{graph1}");
     // println!("{graph2}");
@@ -45,6 +46,6 @@ fn main() {
     }
      */
 
-    graph2.bfs(0).iter().for_each(|e| print!("{:?} ", e.val));
+    graph2.dfs(0).iter().for_each(|e| print!("{:?} ", e.val));
     // println!("{:#?}", graph2.bfs(0));
 }

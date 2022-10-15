@@ -23,10 +23,12 @@ pub(crate) trait InsertAt<T> {
 pub(crate) trait Util<T> {
     fn clear_from(&mut self, idx: usize);
     fn increase_levels(&mut self, amount: u32);
+    fn get_child(&self, idx: usize, data: T) -> Result<usize, String>;
 }
 
 pub(crate) trait Contains<T> {
     fn contains(&self, data: T) -> bool;
+    fn find(&self, data: T) -> Result<usize, String>;
 }
 
 pub(crate) trait Remove<T> {
