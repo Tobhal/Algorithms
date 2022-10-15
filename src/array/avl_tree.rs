@@ -4,8 +4,7 @@ use crate::array::binary_tree::BinaryTree;
 use crate::utils::util::{Utility, Util, Insert, InsertAt};
 
 
-pub struct AVLTree<T>
-where T: PartialOrd + Copy + Display {
+pub struct AVLTree<T> {
     pub(crate) root: Vec<Option<T>>,
     pub(crate) balanceFactor: Vec<u32>,
     pub(crate) nodes: u32,
@@ -19,17 +18,122 @@ crate::impl_BFS!(AVLTree<T: PartialOrd + Copy + Display>);
 // crate::impl_counting!(AVLTree<T: PartialOrd + Copy + Display>);
 */
 
-impl<T> AVLTree<T>
-where T: PartialOrd + Copy + Display {
-    fn rotate_left(&self, idx: usize) {
+impl<T> AVLTree<T> {
+    pub(crate) fn new() -> AVLTree<T> {
+        AVLTree {
+            root: vec![],
+            balanceFactor: vec![],
+            nodes: 0,
+            height: 0
+        }
+    }
+}
+
+impl<T> Utility for AVLTree<T>
+where T: PartialOrd + Copy {
+    fn index_out(&self, idx: usize) -> bool {
+        BinaryTree::<T>::left_child(idx) > self.root.len() || BinaryTree::<T>::right_child(idx) > self.root.len() || idx > self.root.len()
+    }
+
+    fn next_index_out(&self, idx: usize) -> bool {
+        BinaryTree::<T>::left_child(idx) > self.root.len() || BinaryTree::<T>::right_child(idx) > self.root.len()
+    }
+
+    fn index_out_f(&self, idx: usize, op: fn(bool, bool) -> bool) -> bool {
+        op(
+            op(
+                BinaryTree::<T>::left_child(idx) > self.root.len(), BinaryTree::<T>::right_child(idx) > self.root.len()),
+            usize::from(idx) > self.root.len()
+        )
+    }
+
+    fn next_index_out_f(&self, idx: usize,  op: fn(bool, bool) -> bool) -> bool {
+        op(BinaryTree::<T>::left_child(idx) > self.root.len(), BinaryTree::<T>::right_child(idx) > self.root.len())
+    }
+
+    fn left_child(idx: usize) -> usize {2 * idx  + 1}
+    fn right_child(idx: usize) -> usize {2 * idx  + 2}
+    fn parent(idx: usize) -> usize {(idx - 1) / 2}
+
+    fn add_children_to_queue(&self, idx: usize, q: &mut VecDeque<usize>) {
+        if self.root[BinaryTree::<T>::left_child(idx)] != None {
+            q.push_back(BinaryTree::<T>::left_child(idx));
+        }
+        if self.root[BinaryTree::<T>::right_child(idx)] != None {
+            q.push_back(BinaryTree::<T>::right_child(idx));
+        }
+    }
+}
+
+pub(crate) trait Rotate {
+    fn rotate_left(&mut self, idx: usize);
+
+    fn rotate_right(&mut self, idx: usize);
+
+    fn rotate_left_right(&mut self, idx: usize);
+    
+    fn rotate_right_left(&mut self, idx: usize);
+}
+
+impl<T> Rotate for AVLTree<T>
+where T: PartialOrd + Copy {
+    fn rotate_left(&mut self, idx: usize) {
+        let parentIdx = AVLTree::<T>::parent(idx);
+        let parentVal = self.root[parentIdx];
+
+        let mut currentNode = idx;
+
+        loop {
+            self.root[AVLTree::<T>::parent(currentNode)] = self.root[currentNode];
+            self.root[currentNode] = None;
+
+            if self.index_out(currentNode) {
+                break;
+            }
+
+            currentNode = AVLTree::<T>::right_child(currentNode);
+        }
+
+        self.root[AVLTree::<T>::left_child(parentIdx)] = parentVal;
+
+    }
+
+    fn rotate_right(&mut self, idx: usize) {
+        let parentIdx = AVLTree::<T>::parent(idx);
+        let parentVal = self.root[parentIdx];
+
+        let mut currentNode = idx;
+
+        loop {
+            self.root[AVLTree::<T>::parent(currentNode)] = self.root[currentNode];
+            self.root[currentNode] = None;
+
+            if self.index_out(currentNode) {
+                break;
+            }
+
+            currentNode = AVLTree::<T>::left_child(currentNode);
+        }
+
+        self.root[AVLTree::<T>::right_child(parentIdx)] = parentVal;
+    }
+
+    fn rotate_left_right(&mut self, idx: usize) {
         todo!()
     }
 
-    fn rotate_right(&self, idx: usize) {
+    fn rotate_right_left(&mut self, idx: usize) {
         todo!()
     }
 }
 
+
+
+
+
+
+
+/*
 impl<T> InsertAt<T> for AVLTree<T>
 where T: PartialOrd + Copy + Display {
     fn insert_at(&mut self, idx: usize, data: T) {
@@ -123,4 +227,9 @@ where T: PartialOrd + Copy + Display {
         self.root.resize_with(self.nodes as usize, || None);
         self.balanceFactor.resize_with(self.nodes as usize, || 0);
     }
+
+    fn get_child(&self, idx: usize, data: T) -> Result<usize, String> {
+        todo!()
+    }
 }
+ */
