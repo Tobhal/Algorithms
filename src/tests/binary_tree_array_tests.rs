@@ -1,7 +1,9 @@
 #[cfg(test)]
 mod tests {
     use crate::array::binary_tree::BinaryTree;
-    use crate::utils::util::{BFS, Contains, Counting, Insert, OrderedTraversal, Remove};
+    use crate::utils::util::{
+        BFS, Contains, Counting, Insert, OrderedTraversal, Remove
+    };
 
     #[test]
     fn num_nodes() {

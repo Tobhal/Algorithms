@@ -1,5 +1,7 @@
 use crate::array::binary_tree::BinaryTree;
-use crate::utils::util::{BFS, Counting, Insert, OrderedTraversal};
+use crate::utils::util::{
+    BFS, Counting, Insert, OrderedTraversal
+};
 
 fn main() {
     let mut root: BinaryTree<u8> = BinaryTree::new();

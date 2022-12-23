@@ -5,6 +5,7 @@
 #![allow(non_snake_case)]
 
 use crate::array::avl_tree::AVLTree;
+use crate::utils::util::Utility;
 
 mod utils;
 mod tests;

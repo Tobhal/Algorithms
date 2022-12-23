@@ -1,7 +1,24 @@
-// use crate::balanced::array::avl_tree::AVLTree;
-
-use core::fmt::Display;
 use std::collections::VecDeque;
+
+/*
+#[macro_export]
+macro_rules! _ {
+    ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
+        impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? _ for $name $(< $( $lt ),+ >)? {
+
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! _ {
+    ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
+        impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? _$(< $( $lt ),+ >)? for $name $(< $( $lt ),+ >)? {
+
+        }
+    }
+}
+ */
 
 pub(crate) trait Counting {
     fn num_nodes(&self) -> u32;
@@ -23,7 +40,55 @@ pub(crate) trait InsertAt<T> {
 pub(crate) trait Util<T> {
     fn clear_from(&mut self, idx: usize);
     fn increase_levels(&mut self, amount: u32);
+    fn decrease_levels(&mut self, amount: u32);
     fn get_child(&self, idx: usize, data: T) -> Result<usize, String>;
+}
+
+#[macro_export]
+macro_rules! impl_util {
+    ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
+        impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? Util for $name $(< $( $lt ),+ >)? {
+            fn clear_from(self: &mut BinaryTree<T>, idx: usize) {
+                if idx > self.root.len() || self.index_out(idx) || self.next_index_out(idx) {return}
+
+                let mut index_queue: VecDeque<usize> = VecDeque::new();
+
+                self.root[idx] = None;
+
+                self.add_children_to_queue(idx, &mut index_queue);
+
+                let mut current = idx;
+
+                while !index_queue.is_empty() {
+                    current = index_queue.pop_front().unwrap();
+                    self.root[current] = None;
+
+                    if self.index_out(current) {continue}
+                    self.add_children_to_queue(current, &mut index_queue);
+                }
+            }
+
+            fn increase_levels(&mut self, amount: u32) {
+                self.height += 1;
+                self.nodes = 2_i32.pow(self.height + amount) as u32 - 1;
+
+                self.root.resize_with(self.nodes as usize, || None)
+            }
+
+            fn get_child(&self, idx: usize, data: T) -> Result<usize, String> {
+                 match self.root[idx] {
+                    None => { Err("No node found".to_string()) }
+                    Some(val) => {
+                        if val > data {
+                            Ok(BinaryTree::<T>::left_child(idx))
+                        } else {
+                            Ok(BinaryTree::<T>::right_child(idx))
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 pub(crate) trait Contains<T> {
@@ -31,15 +96,47 @@ pub(crate) trait Contains<T> {
     fn find(&self, data: T) -> Result<usize, String>;
 }
 
+#[macro_export]
+macro_rules! impl_contains {
+    ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
+        impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? Contains$(< $( $lt ),+ >)? for $name $(< $( $lt ),+ >)? {
+            fn contains(&self, data: T) -> bool {
+                let mut i: usize = 0;
+
+                loop {
+                    if self.root[i] != None && self.root[i].unwrap() == data {return true;}
+
+                    if self.next_index_out(i) || self.root[i] == None {return false;}
+
+                    i = self.get_child(i, data).unwrap();
+                }
+            }
+
+            fn find(&self, data: T) -> Result<usize, String> {
+                let mut tmp = 0;
+
+                while self.root[tmp] != None && self.root[tmp].unwrap() != data {
+                    tmp = match self.get_child(tmp, data) {
+                        Err(e) => {return Err(e)},
+                        Ok(val) => {
+                            val
+                        }
+                    }
+                }
+
+                Ok(tmp)
+            }
+        }
+    }
+}
+
 pub(crate) trait Remove<T> {
     fn remove(&mut self, data: T);
 }
 
-/*
 #[macro_export]
 macro_rules! impl_counting {
     ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
-        use crate::Counting;
         impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? Counting for $name $(< $( $lt ),+ >)? {
             fn num_nodes(&self) -> u32 {
                 if self.index_out(0) {return 0;}
@@ -152,7 +249,6 @@ macro_rules! impl_counting {
         }
     }
 }
-*/
 
 pub(crate) trait Utility {
     fn index_out(&self, idx: usize) -> bool;
@@ -168,7 +264,6 @@ pub(crate) trait Utility {
     fn add_children_to_queue(&self, idx: usize, queue: &mut VecDeque<usize>);
 }
 
-/*
 #[macro_export]
 macro_rules! impl_utils {
     ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
@@ -208,7 +303,6 @@ macro_rules! impl_utils {
         }
     }
 }
-*/
 
 pub(crate) trait OrderedTraversal<T> {
     fn pre_order(&self) -> Vec<T>;
@@ -221,11 +315,9 @@ pub(crate) trait OrderedTraversal<T> {
     fn post_order_from(&self, idx: usize) -> Vec<T>;
 }
 
-/*
 #[macro_export]
 macro_rules! impl_ordered_traversal {
     ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
-        use crate::OrderedTraversal;
         impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? OrderedTraversal$(< $( $lt ),+ >)? for $name $(< $( $lt ),+ >)? {
             fn pre_order(&self) -> Vec<T> {
                 self.pre_order_from(0)
@@ -389,18 +481,15 @@ macro_rules! impl_ordered_traversal {
         }
     }
 }
-*/
 
 pub(crate) trait BFS<T> {
     fn bfs(&self) -> Vec<T>;
     fn bfs_from(&self, idx: usize) -> Vec<T>;
 }
 
-/*
 #[macro_export]
 macro_rules! impl_BFS {
     ( $name:ident $(< $( $lt:tt $( : $clt:tt $(+ $dlt:tt )* )? ),+ >)? ) => {
-        use crate::BFS;
         impl $(< $( $lt $( : $clt $(+ $dlt )* )? ),+ >)? BFS$(< $( $lt ),+ >)? for $name $(< $( $lt ),+ >)? {
             fn bfs(&self) -> Vec<T> {
                 self.bfs_from(0)
@@ -432,4 +521,3 @@ macro_rules! impl_BFS {
         }
     }
 }
-*/
