@@ -225,9 +225,17 @@ where T: PartialOrd + Copy + Debug {
         let mut parentIdx = idx;
         let mut currentNode = dirAgainst(idx);
 
-        // loop {
-        for i in 0..5 {
+
+        // Note: Implement BFS for moving the nodes. So:
+        //  1. Append all children to a list
+        //  2. Move the children
+        //  3. Go to the childrens location and append their children
+        //  4. If there are any children repeat until no more children or index_out()
+        // Move nodes up
+        loop {
             parentIdx = AVLTree::<T>::parent(currentNode);
+
+            println!("\t{:?} -> {:?}*", self.root[currentNode], self.root[parentIdx]);
 
             // Move current node 1 step up
             self.root[parentIdx] = self.root[currentNode];
@@ -236,6 +244,7 @@ where T: PartialOrd + Copy + Debug {
             self.root[currentNode] = None;
             self.balanceFactor[currentNode] = 0;
 
+            // Note: The problem is here
             // If current node is out of bounce, break
             if self.index_out(currentNode) {
                 break;
@@ -268,10 +277,13 @@ where T: PartialOrd + Copy + Debug {
                     childTowards = dirTowards(fromIdx);
                     childAgainst = dirAgainst(fromIdx);
 
+                    // Move leafs
                     if self.node_is_leaf(fromIdx, &movedToIndexes) {
                         if toIdx >= self.root.len() {
                             self.increase_levels(1);
                         }
+
+                        println!("\t{:?} -> {:?}", self.root[fromIdx], self.root[toIdx]);
 
                         self.root[toIdx] = self.root[fromIdx];
                         self.balanceFactor[toIdx] = self.balanceFactor[fromIdx];

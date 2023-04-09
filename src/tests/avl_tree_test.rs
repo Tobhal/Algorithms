@@ -119,6 +119,97 @@ mod tests {
         assert_eq!(root.root, vec![Some('d'), Some('b'), Some('f'), Some('a'), Some('c'), Some('e'), Some('g')]);
     }
 
+    #[test]
+    fn insert_iterative_hard() {
+        let mut root: AVLTree<char> = AVLTree::new();
+
+        root.insert('a');
+        assert_eq!(root.root, vec![Some('a')]);
+
+        root.insert('b');
+        assert_eq!(root.root, vec![Some('a'), None, Some('b')]);
+
+        root.insert('c');
+        assert_eq!(root.root, vec![Some('b'), Some('a'), Some('c')]);
+
+        root.insert('d');
+        assert_eq!(root.root, vec![Some('b'), Some('a'), Some('c'), None, None, None, Some('d')]);
+
+        root.insert('e');
+        assert_eq!(root.root, vec![Some('b'), Some('a'), Some('d'), None, None, Some('c'), Some('e')]);
+
+        root.insert('f');
+        assert_eq!(root.root, vec![Some('d'), Some('b'), Some('e'), Some('a'), Some('c'), None, Some('f')]);
+
+        root.insert('g');
+        assert_eq!(root.root, vec![Some('d'), Some('b'), Some('f'), Some('a'), Some('c'), Some('e'), Some('g')]);
+
+        root.insert('h');
+        assert_eq!(root.root, vec![
+            Some('d'),
+            Some('b'), Some('f'),
+            Some('a'), Some('c'), Some('e'), Some('g'),
+            None, None, None, None, None, None, None, Some('h'),
+        ]);
+
+        root.insert('i');
+        assert_eq!(root.root, vec![
+            Some('d'),
+            Some('b'), Some('f'),
+            Some('a'), Some('c'), Some('e'), Some('h'),
+            None, None, None, None, None, None, Some('g'), Some('i'),
+        ]);
+
+        root.insert('j');
+        assert_eq!(root.root, vec![
+            Some('d'),
+            Some('b'), Some('h'),
+            Some('a'), Some('c'), Some('f'), Some('i'),
+            None, None, None, None, Some('e'), Some('g'), None, Some('j'),
+        ]);
+
+        root.insert('k');
+        assert_eq!(root.root, vec![
+            Some('d'),
+            Some('b'), Some('h'),
+            Some('a'), Some('c'), Some('f'), Some('j'),
+            None, None, None, None, Some('e'), Some('g'), Some('i'), Some('k'),
+        ]);
+
+        // Note: Big change to tree, so there might be errors here.
+        // Note: 'i' from second to last position is not moved. So there needs to be added a loop somewhere.
+        root.insert('l');
+        assert_eq!(root.root, vec![
+            Some('h'),
+            Some('d'), Some('j'),
+            Some('b'), Some('f'), Some('i'), Some('k'),
+            Some('a'), Some('c'), Some('e'), Some('g'), None, None, None, Some('l'),
+        ]);
+
+        root.insert('m');
+        assert_eq!(root.root, vec![
+            Some('h'),
+            Some('d'), Some('j'),
+            Some('b'), Some('f'), Some('i'), Some('l'),
+            Some('a'), Some('c'), Some('e'), Some('g'), None, None, Some('k'), Some('m'),
+        ]);
+
+        root.insert('n');
+        assert_eq!(root.root, vec![
+            Some('h'),
+            Some('d'), Some('l'),
+            Some('b'), Some('f'), Some('j'), Some('m'),
+            Some('a'), Some('c'), Some('e'), Some('g'), Some('i'), Some('k'), None, Some('n'),
+        ]);
+
+        root.insert('o');
+        assert_eq!(root.root, vec![
+            Some('h'),
+            Some('d'), Some('l'),
+            Some('b'), Some('f'), Some('j'), Some('n'),
+            Some('a'), Some('c'), Some('e'), Some('g'), Some('i'), Some('k'), Some('m'), Some('o'),
+        ]);
+    }
 
     /*
     Insert complex
