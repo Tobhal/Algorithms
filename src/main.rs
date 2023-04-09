@@ -6,6 +6,7 @@
 
 use crate::array::avl_tree::AVLTree;
 use crate::utils::util::Utility;
+use std::ops::Add;
 
 mod utils;
 mod tests;
@@ -13,10 +14,5 @@ mod array;
 mod examples;
 
 fn main() {
-    let root: AVLTree<u8> = AVLTree {
-        root: vec![Some(5), Some(1)],
-        balanceFactor: vec![],
-        nodes: 0,
-        height: 0
-    };
+
 }

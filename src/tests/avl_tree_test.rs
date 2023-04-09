@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::array::avl_tree::Rotate;
+    use crate::array::avl_tree::{Direction, Rotate};
     use crate::AVLTree;
     use crate::utils::util::{Contains, Insert, Util};
 
@@ -36,8 +36,39 @@ mod tests {
         ]);
     }
 
+    /*
+    Iterative insert tests
+     */
     #[test]
-    fn insert_iterative() {
+    fn insert_iterative_easy() {
+        let mut root: AVLTree<char> = AVLTree::new();
+
+        root.insert('a');
+        assert_eq!(root.root, vec![Some('a')]);
+
+        root.insert('b');
+        assert_eq!(root.root, vec![Some('a'), None, Some('b')]);
+
+        root.insert('c');
+        assert_eq!(root.root, vec![Some('b'), Some('a'), Some('c')]);
+    }
+
+    #[test]
+    fn insert_iterative_easy_inverse() {
+        let mut root: AVLTree<char> = AVLTree::new();
+
+        root.insert('c');
+        assert_eq!(root.root, vec![Some('c')]);
+
+        root.insert('b');
+        assert_eq!(root.root, vec![Some('c'), Some('b'), None]);
+
+        root.insert('a');
+        assert_eq!(root.root, vec![Some('b'), Some('a'), Some('c')]);
+    }
+
+    #[test]
+    fn insert_iterative_medium() {
         let mut root: AVLTree<char> = AVLTree::new();
 
         root.insert('a');
@@ -55,11 +86,43 @@ mod tests {
         root.insert('e');
         assert_eq!(root.root, vec![Some('b'), Some('a'), Some('d'), None, None, Some('c'), Some('e')]);
 
-        // Rotate left
         root.insert('f');
         assert_eq!(root.root, vec![Some('d'), Some('b'), Some('e'), Some('a'), Some('c'), None, Some('f')]);
+
+        root.insert('g');
+        assert_eq!(root.root, vec![Some('d'), Some('b'), Some('f'), Some('a'), Some('c'), Some('e'), Some('g')]);
     }
 
+    #[test]
+    fn insert_iterative_medium_inverse() {
+        let mut root: AVLTree<char> = AVLTree::new();
+
+        root.insert('g');
+        assert_eq!(root.root, vec![Some('g')]);
+
+        root.insert('f');
+        assert_eq!(root.root, vec![Some('g'), Some('f'), None]);
+
+        root.insert('e');
+        assert_eq!(root.root, vec![Some('f'), Some('e'), Some('g')]);
+
+        root.insert('d');
+        assert_eq!(root.root, vec![Some('f'), Some('e'), Some('g'), Some('d'), None, None, None]);
+
+        root.insert('c');
+        assert_eq!(root.root, vec![Some('f'), Some('d'), Some('g'), Some('c'), Some('e'), None, None]);
+
+        root.insert('b');
+        assert_eq!(root.root, vec![Some('d'), Some('c'), Some('f'), Some('b'), None, Some('e'), Some('g')]);
+
+        root.insert('a');
+        assert_eq!(root.root, vec![Some('d'), Some('b'), Some('f'), Some('a'), Some('c'), Some('e'), Some('g')]);
+    }
+
+
+    /*
+    Insert complex
+     */
     #[test]
     fn insert_complex() {
         // TODO: Fix
@@ -200,6 +263,38 @@ mod tests {
     Rotate
      */
     #[test]
+    fn rotate_left_single_val() {
+        let mut root: AVLTree<char> = AVLTree {
+            root: vec![Some('a')],
+            balanceFactor: vec![3],
+            nodes: 1,
+            height: 0,
+        };
+
+        root.increase_levels(1);
+
+        root.rotate(0, Direction::LEFT);
+
+        assert_eq!(root.root, vec![None, Some('a'), None]);
+    }
+
+    #[test]
+    fn rotate_right_single_val() {
+        let mut root: AVLTree<char> = AVLTree {
+            root: vec![Some('a')],
+            balanceFactor: vec![3],
+            nodes: 1,
+            height: 0,
+        };
+
+        root.increase_levels(1);
+
+        root.rotate(0, Direction::RIGHT);
+
+        assert_eq!(root.root, vec![None, None, Some('a')]);
+    }
+
+    #[test]
     fn rotate_left() {
         let mut root = AVLTree {
             root: vec![
@@ -216,7 +311,7 @@ mod tests {
             height: 3
         };
 
-        root.rotate_left(root.find('a').unwrap());
+        root.rotate(root.find('a').unwrap(), Direction::LEFT);
 
         assert_eq!(root.root, vec![
             Some('b'),
@@ -242,7 +337,7 @@ mod tests {
             height: 3
         };
 
-        root.rotate_right(root.find('c').unwrap());
+        root.rotate(root.find('c').unwrap(), Direction::RIGHT);
 
         assert_eq!(root.root, vec![
             Some('b'),
@@ -260,16 +355,16 @@ mod tests {
                 None, Some('b'), None, None
             ],
             balanceFactor: vec![
-                2,
-                1, 0,
-                0, 0, 0, 0
+                3,
+                2, 0,
+                0, 1, 0, 0
             ],
             nodes: 3,
             height: 3
         };
 
-        root.rotate_left(root.find('a').unwrap());
-        root.rotate_right(root.find('c').unwrap());
+        root.rotate(root.find('a').unwrap(), Direction::LEFT);
+        root.rotate(root.find('c').unwrap(), Direction::RIGHT);
 
         assert_eq!(root.root, vec![
             Some('b'),
@@ -287,16 +382,16 @@ mod tests {
                 None, None, Some('b'), None
             ],
             balanceFactor: vec![
-                2,
-                0, 1,
-                0, 0, 0, 0
+                3,
+                0, 2,
+                0, 0, 1, 0
             ],
             nodes: 3,
             height: 3
         };
 
-        root.rotate_right(root.find('c').unwrap());
-        root.rotate_left(root.find('a').unwrap());
+        root.rotate(root.find('c').unwrap(), Direction::RIGHT);
+        root.rotate(root.find('a').unwrap(), Direction::LEFT);
 
         assert_eq!(root.root, vec![
             Some('b'),

@@ -1,14 +1,60 @@
+use std::arch::aarch64::poly8x8_t;
 use std::collections::VecDeque;
 use std::env::current_exe;
 use std::fmt::{Debug, Display};
+use std::process::id;
 use std::thread::current;
 use crate::array::binary_tree::BinaryTree;
-use crate::{
-    impl_BFS, impl_counting, impl_ordered_traversal, impl_util, impl_utils
-};
+use crate::{impl_BFS, impl_counting, impl_ordered_traversal, impl_util, impl_utils};
 use crate::utils::util::{
     Counting, Utility, OrderedTraversal, BFS, Util, Insert, InsertAt, Contains
 };
+
+pub(crate) enum Direction {
+    LEFT,
+    RIGHT
+}
+
+impl Direction {
+    fn get_direction_func(dir: Direction) -> (fn(usize) -> usize, fn(usize) -> usize) {
+        match dir {
+            Direction::LEFT => (AVLTree::<usize>::left_child, AVLTree::<usize>::right_child),
+            Direction::RIGHT => (AVLTree::<usize>::right_child, AVLTree::<usize>::left_child)
+        }
+    }
+}
+
+impl From<bool> for Direction {
+    fn from(b: bool) -> Self {
+        match b {
+            true => Direction::LEFT,
+            false => Direction::RIGHT
+        }
+    }
+}
+
+pub(crate) trait Child {
+    fn left_child(self) -> usize;
+    fn right_child(self) -> usize;
+    fn parent(self) -> usize;
+}
+
+impl Child for usize {
+    // Replace AVLTree::<T>::left_child(idx)
+    fn left_child(self) -> usize {
+        2 * self + 1
+    }
+
+    // Replace AVLTree::<T>::right_child(idx)
+    fn right_child(self) -> usize {
+        2 * self + 2
+    }
+
+    // Replace AVLTree::<T>::parent(idx)
+    fn parent(self) -> usize {
+        (self - 1) / 2
+    }
+}
 
 // https://www.cs.usfca.edu/~galles/visualization/AVLtree.html
 
@@ -76,6 +122,7 @@ where T: PartialOrd + Copy + Debug {
 
             match self.root[nodeIdx] {
                 None => {
+                    println!("Insert {data:?} in {nodeIdx}");
                     self.root[nodeIdx] = Some(data);
                     self.balanceFactor[nodeIdx] = 1;
                     break;
@@ -97,7 +144,7 @@ where T: PartialOrd + Copy + Debug {
 
         let mut lastBalanceFactor: u32 = 1;
 
-        // Update balance factor
+        // Update balance factor and rotate
         while nodeIdx != 0 {
             nodeIdx = AVLTree::<T>::parent(nodeIdx);
 
@@ -110,11 +157,13 @@ where T: PartialOrd + Copy + Debug {
             rightNode = AVLTree::<T>::right_child(nodeIdx);
 
             if self.balanceFactor[leftNode] > (self.balanceFactor[rightNode] + 1) {
-                self.rotate_right(nodeIdx);
+                println!("Rotate right");
+                self.rotate(nodeIdx, Direction::RIGHT);
                 lastBalanceFactor -= 1;
                 decreaseSize = true;
             } else if self.balanceFactor[rightNode] > (self.balanceFactor[leftNode] + 1) {
-                self.rotate_left(nodeIdx);
+                println!("Rotate left");
+                self.rotate(nodeIdx, Direction::LEFT);
                 lastBalanceFactor -= 1;
                 decreaseSize = true
             }
@@ -133,9 +182,7 @@ where T: PartialOrd + Copy + Debug {
 }
 
 pub(crate) trait Rotate {
-    fn rotate_left(&mut self, idx: usize);
-
-    fn rotate_right(&mut self, idx: usize);
+    fn rotate(&mut self, idx: usize, dir: Direction);
 
     fn move_nodes(&mut self, from_idx: usize, to_idx: usize);
 
@@ -144,31 +191,42 @@ pub(crate) trait Rotate {
 
 impl<T> Rotate for AVLTree<T>
 where T: PartialOrd + Copy + Debug {
-    fn rotate_left(&mut self, idx: usize) {
-        let mut parentIdx = idx;
-        let parentVal = self.root[parentIdx];
+    fn rotate(&mut self, idx: usize, dir: Direction) {
+        let (dirTowards, dirAgainst): (fn(usize) -> usize, fn(usize) -> usize) = Direction::get_direction_func(dir);
 
-        let mut currentNode = AVLTree::<T>::left_child(idx);
+        if self.root[dirTowards(idx)] != None {
+            self.move_nodes(dirTowards(idx), dirTowards(dirTowards(idx)))
+        }
 
-        currentNode = AVLTree::<T>::right_child(idx);
+        self.root[dirTowards(idx)] = self.root[idx];
+        self.root[idx] = None;
 
-        parentIdx = AVLTree::<T>::left_child(idx);
+        self.balanceFactor[dirTowards(idx)] = self.balanceFactor[idx] - 2;
+        self.balanceFactor[idx] = 0;
 
-        // Move original node to right child
-        match self.root[parentIdx] {
-            // If left child is empty
-            None => {
-                self.root[parentIdx] = parentVal;
-                self.balanceFactor[parentIdx] = self.balanceFactor[AVLTree::<T>::right_child(parentIdx)] + 1;
-            }
-            // If left child is not empty
-            Some(val) => {
-                self.move_nodes(parentIdx, AVLTree::<T>::left_child(parentIdx));
+        // println!("{:?}", !self.index_out(dirAgainst(dirTowards(idx))));
+        // println!("{:?}", self.root[dirAgainst(dirTowards(idx))] == None);
+        // println!("{:?}", !self.index_out(dirAgainst(dirTowards(idx))) && self.root[dirAgainst(dirTowards(idx))] == None);
+
+        if !self.index_out(dirAgainst(dirTowards(idx))) && self.root[dirAgainst(dirTowards(idx))] == None {
+            if dirTowards(dirAgainst(idx)) > dirTowards(idx) {
+                self.move_nodes(
+                    dirTowards(dirAgainst(idx)),
+                    dirAgainst(dirTowards(idx))
+                )
+            } else {
+                self.move_nodes(
+                    dirTowards(dirAgainst(idx)),
+                    dirTowards(dirTowards(idx))
+                );
             }
         }
 
-        // Loop thou all children and move them 1 step up
-        loop {
+        let mut parentIdx = idx;
+        let mut currentNode = dirAgainst(idx);
+
+        // loop {
+        for i in 0..5 {
             parentIdx = AVLTree::<T>::parent(currentNode);
 
             // Move current node 1 step up
@@ -183,54 +241,22 @@ where T: PartialOrd + Copy + Debug {
                 break;
             }
 
-            currentNode = AVLTree::<T>::right_child(currentNode);
+            currentNode = dirAgainst(currentNode);
         }
-
-    }
-
-    fn rotate_right(&mut self, idx: usize) {
-        let mut parentIdx = idx;
-        let parentVal = self.root[parentIdx];
-
-
-        let mut currentNode = AVLTree::<T>::left_child(idx);
-
-        // Loop thou all children and move them 1 step up
-        loop {
-            parentIdx = AVLTree::<T>::parent(currentNode);
-
-            // Move current node 1 step up
-            self.root[parentIdx] = self.root[currentNode];
-            self.balanceFactor[parentIdx] = self.balanceFactor[currentNode];
-
-            self.root[currentNode] = None;
-            self.balanceFactor[currentNode] = 0;
-
-            // If current node is out of bounce, break
-            if self.index_out(currentNode) {
-                break;
-            }
-
-            currentNode = AVLTree::<T>::left_child(currentNode);
-        }
-
-        // Move original node to left child
-        parentIdx = AVLTree::<T>::right_child(idx);
-        self.root[parentIdx] = parentVal;
-        self.balanceFactor[parentIdx] = self.balanceFactor[AVLTree::<T>::left_child(parentIdx)] + 1;
     }
 
     fn move_nodes(&mut self, from: usize, to: usize) {
+        println!("Move node({:?}) from {from} to {to}({:?})", self.root[from], self.root[to]);
+
         let mut fromIdx: usize = from;
         let mut toIdx: usize = to;
 
         let mut movedToIndexes: Vec<usize> = Vec::new();
+        
+        let mut childTowards: usize = 0;
+        let mut childAgainst: usize = 0;
 
-        let mut operations: (usize, fn(usize) -> usize, usize, fn(usize) -> usize) = if to % 2 == 0 {
-            (0, AVLTree::<T>::right_child, 0, AVLTree::<T>::left_child)
-        } else {
-            (0, AVLTree::<T>::left_child, 0, AVLTree::<T>::right_child)
-        };
+        let (dirTowards, dirAgainst): (fn(usize) -> usize, fn(usize) -> usize) = Direction::get_direction_func(Direction::from(to % 2 == 0));
 
         while self.root[from] != None {
             match self.root[fromIdx] {
@@ -239,8 +265,8 @@ where T: PartialOrd + Copy + Debug {
                     toIdx = AVLTree::<T>::parent(toIdx);
                 }
                 Some(val) => {
-                    operations.0 = operations.1(fromIdx);
-                    operations.2 = operations.3(fromIdx);
+                    childTowards = dirTowards(fromIdx);
+                    childAgainst = dirAgainst(fromIdx);
 
                     if self.node_is_leaf(fromIdx, &movedToIndexes) {
                         if toIdx >= self.root.len() {
@@ -255,12 +281,12 @@ where T: PartialOrd + Copy + Debug {
 
                         movedToIndexes.push(toIdx);
 
-                    } else if self.root[operations.0] != None && !movedToIndexes.contains(&operations.0) {
-                        fromIdx = operations.1(fromIdx);
-                        toIdx = operations.1(toIdx);
-                    } else if self.root[operations.2] != None && !movedToIndexes.contains(&operations.2) {
-                        fromIdx = operations.3(fromIdx);
-                        toIdx = operations.3(toIdx);
+                    } else if self.root[childTowards] != None && !movedToIndexes.contains(&childTowards) {
+                        fromIdx = dirTowards(fromIdx);
+                        toIdx = dirTowards(toIdx);
+                    } else if self.root[childAgainst] != None && !movedToIndexes.contains(&childAgainst) {
+                        fromIdx = dirAgainst(fromIdx);
+                        toIdx = dirAgainst(toIdx);
                     }
                 }
             }

@@ -6,7 +6,7 @@ use std::ptr::null;
 use std::str::ParseBoolError;
 use crate::{impl_BFS, impl_contains, impl_counting, impl_ordered_traversal, impl_utils};
 use crate::utils::util::{
-    Counting, Utility, OrderedTraversal, BFS, Insert, InsertAt, Util, Contains, Remove, Direction
+    Counting, Utility, OrderedTraversal, BFS, Insert, InsertAt, Util, Contains, Remove
 };
 
 pub struct BinaryTree<T> {
