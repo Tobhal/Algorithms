@@ -135,10 +135,12 @@ where T: Debug + Clone {
 impl<T> Display for Graph<T>
 where T: Debug + Display {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        let mut s = String::new();
+        let mut display_string = String::new();
 
-        s += &*self.nodes.len().to_string();
-        let indexWidth = s.len();
+        // Add number of nodes
+        display_string += &*self.nodes.len().to_string();
+
+        let indexWidth = display_string.len();
 
         let mut numChildWidth = 0;
         let mut childWidth = 0;
