@@ -10,8 +10,8 @@ Child
  */
 #[derive(Debug, Copy)]
 pub struct Child {
-    idx: usize,
-    weight: u32,
+    pub(crate) idx: usize,
+    pub(crate) weight: u32,
 }
 
 impl Clone for Child {
@@ -35,7 +35,7 @@ impl Child {
         }
     }
 
-    pub(crate) fn getCleanValue(&self, weighted: bool) -> String {
+    pub(crate) fn get_clean_value(&self, weighted: bool) -> String {
         if weighted {
             format!("{} {}", self.idx, self.weight)
         } else {
@@ -81,6 +81,19 @@ where T: Debug {
     }
 }
 
+impl<T> From<(T, Vec<usize>)> for Node<T>
+where T: Debug {
+    fn from(value: (T, Vec<usize>)) -> Self {
+        Node {
+            val: value.0,
+            children: value.1
+                .iter()
+                .map(|val| Child::new(val.clone()))
+                .collect()
+        }
+    }
+}
+
 /*
 Graph
  */
@@ -115,13 +128,26 @@ where T: Debug {
     }
 }
 
+impl<T> From<Vec<(T, Vec<usize>)>> for Graph<T>
+where T: Debug + Default + Clone {
+    fn from(value: Vec<(T, Vec<usize>)>) -> Self {
+        let mut graph = Graph::<T>::new_with_size(value.len());
+
+        for (idx, node) in value.iter().enumerate() {
+            graph.nodes[idx] = Node::from(node.clone())
+        }
+
+        graph
+    }
+}
+
 impl<T> Graph<T>
-where T: Debug + Clone {
-    pub(crate) fn new_with_size(size: usize, emptyNodeValue: T) -> Graph<T> {
+where T: Debug + Default {
+    pub(crate) fn new_with_size(size: usize) -> Graph<T> {
         let mut v = vec![];
 
         v.resize_with(size, || Node {
-            val: emptyNodeValue.clone(),
+            val: T::default(),
             children: vec![]
         });
 
@@ -199,6 +225,9 @@ where T: Debug + Display {
     }
 }
 
+/*
+Traversal
+ */
 impl<T> Graph<T>
 where T: Debug {
     pub(crate) fn dfs(&self, fromIndex: usize) -> Vec<&Node<T>> {

@@ -27,7 +27,7 @@ impl FileReader<char> for Graph<char> {
             .expect("could not parse string to int");
 
         // Create the graph and fill with the correct amount of elements
-        let mut graph = Graph::<char>::new_with_size(numNodes, ' ');
+        let mut graph = Graph::<char>::new_with_size(numNodes);
 
         graph.weighted = weighted;
 
@@ -101,7 +101,7 @@ impl FileReader<String> for Graph<String> {
             .expect("could not parse string to int");
 
         // Create the graph and fill with the correct amount of elements
-        let mut graph = Graph::<String>::new_with_size(numNodes, String::new());
+        let mut graph = Graph::<String>::new_with_size(numNodes);
 
         let multiply = if weighted {
             graph.weighted = true;
