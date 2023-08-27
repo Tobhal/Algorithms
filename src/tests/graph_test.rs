@@ -14,69 +14,115 @@ mod tests {
         3 d 1   4
         4 e 1   0
          */
-        let values = vec!['a','b','c','d','e'];
-        let neighbours = vec![
-            vec![1],
-            vec![2,3],
-            vec![3],
-            vec![4],
-            vec![0]
+        let nodes = vec![
+            ('a', vec![1]),
+            ('b', vec![2, 3]),
+            ('c', vec![3]),
+            ('d', vec![4]),
+            ('e', vec![0])
         ];
 
-        let mut graph: Graph<char> = Graph::new_with_size(5, ' ');
+        let graph: Graph<char> = Graph::from(nodes.clone());
 
-        for i in 0..5 {
-            graph.add_node(
-                Node::new(values[i])
-            )
+        assert_eq!(graph.nodes.len(), 5);
+        assert_eq!(graph.weighted, false);
+
+        for (i, node) in nodes.iter().enumerate() {
+            assert_eq!(node.0, graph.nodes[i].val);
+
+            for (l, child) in node.1.clone().iter().enumerate() {
+                assert_eq!(child.clone(), graph.nodes[i].children[l].idx)
+            }
         }
     }
 
     fn gen_graph() -> Graph<u8> {
-        Graph {
-            nodes: vec![
-                Node::new_with_children(1, vec![
-                    Child::new(3),
-                    Child::new(4)
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(0),
-                    Child::new(3),
-                    Child::new(5)
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(1),
-                    Child::new(6),
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(5)
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(7)
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(1),
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(5),
-                ]),
-                Node::new_with_children(1, vec![
-                    Child::new(5),
-                ])
-            ],
-            weighted: false
-        }
+        let nodes = vec![
+            (0, vec![1]),
+            (1, vec![0, 2, 3]),
+            (2, vec![1, 3, 4]),
+            (3, vec![1, 2]),
+            (4, vec![2, 6]),
+            (5, vec![6]),
+            (6, vec![4, 5])
+        ];
+
+        Graph::from(nodes)
     }
 
     #[test]
     fn bfs() {
         let graph = gen_graph();
-        println!("{graph}");
+        let path: Vec<u8> = graph.bfs(2)
+            .iter()
+            .map(|n| n.val)
+            .collect();
+
+        assert_eq!(path, vec![2, 1, 3, 4, 0, 6, 5])
     }
 
     #[test]
     fn dfs() {
         let graph = gen_graph();
-        println!("{graph}");
+        let path: Vec<u8> = graph.dfs(2)
+            .iter()
+            .map(|n| n.val)
+            .collect();
+
+        assert_eq!(path, vec![2, 1, 0, 3, 4, 6, 5])
+    }
+
+    #[test]
+    fn ssrp() {
+        let graph = Graph {
+            nodes: vec![
+                Node {
+                    val: 0,
+                    children: vec![
+                        Child::new(5)
+                    ],
+                },
+                Node {
+                    val: 1,
+                    children: vec![
+                        Child::new(2),
+                        Child::new(5)
+                    ],
+                },
+                Node {
+                    val: 2,
+                    children: vec![
+                        Child::new(1),
+                        Child::new(3),
+                        Child::new(5),
+                    ],
+                },
+                Node {
+                    val: 3,
+                    children: vec![
+                        Child::new(0),
+                        Child::new(4)
+                    ],
+                },
+                Node {
+                    val: 4,
+                    children: vec![
+                        Child::new(3),
+                        Child::new(5),
+                    ],
+                },
+                Node {
+                    val: 5,
+                    children: vec![
+                        Child::new(0),
+                        Child::new(3)
+                    ],
+                },
+            ],
+            weighted: false,
+        };
+
+
+
     }
 }
