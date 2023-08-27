@@ -48,13 +48,13 @@ impl Child {
 Node
  */
 #[derive(Debug)]
-pub struct Node<T>
+pub struct Node<T> {
 where T: Debug {
     pub(crate) val: T,
     pub(crate) children: Vec<Child> // child and weight
 }
 
-impl<T> Node<T>
+impl<T> Node<T> {
 where T: Debug {
     pub(crate) fn new(val: T) -> Node<T> {
         Node {
@@ -81,7 +81,7 @@ where T: Debug {
     }
 }
 
-impl<T> From<(T, Vec<usize>)> for Node<T>
+impl<T> From<(T, Vec<usize>)> for Node<T> {
 where T: Debug {
     fn from(value: (T, Vec<usize>)) -> Self {
         Node {
@@ -98,13 +98,13 @@ where T: Debug {
 Graph
  */
 #[derive(Debug)]
-pub struct Graph<T>
+pub struct Graph<T> {
 where T: Debug {
     pub(crate) nodes: Vec<Node<T>>,
     pub(crate) weighted: bool
 }
 
-impl<T> Graph<T>
+impl<T> Graph<T> {
 where T: Debug {
     pub(crate) fn new() -> Graph<T> {
         Graph {
@@ -129,7 +129,7 @@ where T: Debug {
 }
 
 impl<T> From<Vec<(T, Vec<usize>)>> for Graph<T>
-where T: Debug + Default + Clone {
+where T: Default + Clone {
     fn from(value: Vec<(T, Vec<usize>)>) -> Self {
         let mut graph = Graph::<T>::new_with_size(value.len());
 
@@ -142,7 +142,7 @@ where T: Debug + Default + Clone {
 }
 
 impl<T> Graph<T>
-where T: Debug + Default {
+where T: Default {
     pub(crate) fn new_with_size(size: usize) -> Graph<T> {
         let mut v = vec![];
 
@@ -159,7 +159,7 @@ where T: Debug + Default {
 }
 
 impl<T> Display for Graph<T>
-where T: Debug + Display {
+where T: Display {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut display_string = String::new();
 
@@ -215,7 +215,7 @@ where T: Debug + Display {
                                         numChildWidth = numChildWidth);
 
             for child in node.children.iter() {
-                display_string += &*format!("{:width$} ", child.get_clean_calue(self.weighted), width = indexWidth + childWidth);
+                display_string += &*format!("{:width$} ", child.get_clean_value(self.weighted), width = indexWidth + childWidth);
             }
 
             display_string += "\n";
