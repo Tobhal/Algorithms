@@ -173,23 +173,27 @@ where T: Debug + Display {
         }
 
         valWidth += 1;
-        s += "\n";
+
+        // Add header
+        display_string += "\n";
+        display_string += format!("{:indexWidth$}  {:valWidth$}{:numChildWidth$}   {:width$}\n", "n", "v", "nc", "c", width = indexWidth + childWidth).as_str();
+
 
         for (i, node) in self.nodes.iter().enumerate() {
-            s += &*format!("{:indexWidth$} {:valWidth$} {:numChildWidth$}    ",
-                           i, node.val, node.children.len(),
-                           indexWidth = indexWidth,
-                           valWidth = valWidth,
-                           numChildWidth = numChildWidth);
+            display_string += &*format!("{:indexWidth$} {:valWidth$} {:numChildWidth$}    ",
+                                        i, node.val, node.children.len(),
+                                        indexWidth = indexWidth,
+                                        valWidth = valWidth,
+                                        numChildWidth = numChildWidth);
 
             for child in node.children.iter() {
-                s += &*format!("{:width$} ", child.getCleanValue(self.weighted), width = indexWidth + childWidth);
+                display_string += &*format!("{:width$} ", child.get_clean_calue(self.weighted), width = indexWidth + childWidth);
             }
 
-            s += "\n";
+            display_string += "\n";
         }
 
-        write!(f, "{s}")
+        write!(f, "{display_string}")
     }
 }
 
