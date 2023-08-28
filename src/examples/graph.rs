@@ -1,5 +1,5 @@
 use crate::array::graph::{Child, Graph, Node};
-use crate::utils::readFile::FileReader;
+use crate::utils::read_file::FileReader;
 
 fn main() {
     let mut node0 = Node::new("kake");

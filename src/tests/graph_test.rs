@@ -73,56 +73,42 @@ mod tests {
     }
 
     #[test]
-    fn ssrp() {
-        let graph = Graph {
-            nodes: vec![
-                Node {
-                    val: 0,
-                    children: vec![
-                        Child::new(5)
-                    ],
-                },
-                Node {
-                    val: 1,
-                    children: vec![
-                        Child::new(2),
-                        Child::new(5)
-                    ],
-                },
-                Node {
-                    val: 2,
-                    children: vec![
-                        Child::new(1),
-                        Child::new(3),
-                        Child::new(5),
-                    ],
-                },
-                Node {
-                    val: 3,
-                    children: vec![
-                        Child::new(0),
-                        Child::new(4)
-                    ],
-                },
-                Node {
-                    val: 4,
-                    children: vec![
-                        Child::new(3),
-                        Child::new(5),
-                    ],
-                },
-                Node {
-                    val: 5,
-                    children: vec![
-                        Child::new(0),
-                        Child::new(3)
-                    ],
-                },
-            ],
-            weighted: false,
-        };
+    fn neighborhood() {
+        let graph = gen_graph();
+        let neighborhood = graph.get_neighborhood_matrix();
+        let correct_neighborhood = vec![
+            vec![true, true, false, false, false, false, false],
+            vec![true, true, true, true, false, false, false],
+            vec![false, true, true, true, true, false, false],
+            vec![false, true, true, true, false, false, false],
+            vec![false, false, true, false, true, false, true],
+            vec![false, false, false, false, false, true, true],
+            vec![false, false, false, false, true, true, true]
+        ];
 
+        assert_eq!(neighborhood, correct_neighborhood)
+    }
 
+    #[test]
+    fn warshall() {
+        let graph = Graph::from(vec![
+            (1, vec![5]),
+            (2, vec![2, 5]),
+            (3, vec![1, 3, 5]),
+            (4, vec![0, 4]),
+            (5, vec![5, 3]),
+            (6, vec![0, 3])
+        ]);
+        let aprp = graph.warshall();
+        let solution_aprp = vec![
+            vec![true, false, false, true, true, true],
+            vec![true, true, true, true, true, true],
+            vec![true, true, true, true, true, true],
+            vec![true, false, false, true, true, true],
+            vec![true, false, false, true, true, true],
+            vec![true, false, false, true, true, true]
+        ];
 
+        assert_eq!(aprp, solution_aprp)
     }
 }

@@ -16,7 +16,7 @@ mod tests {
             Some('a'), Some('c'),
             None, None, None, Some('d')
         ]);
-        assert_eq!(root.balanceFactor, vec![
+        assert_eq!(root.balance_factor, vec![
             3,
             1, 2,
             0, 0, 0, 1
@@ -29,7 +29,7 @@ mod tests {
             Some('a'), Some('d'),
             None, None, Some('c'), Some('e')
         ]);
-        assert_eq!(root.balanceFactor, vec![
+        assert_eq!(root.balance_factor, vec![
             3,
             1, 2,
             0, 0, 1, 1
@@ -243,7 +243,7 @@ mod tests {
                 Some('a'), Some('c'), Some('f'), Some('j'),
                 None, None, None, None, Some('e'), Some('g'), Some('i'), Some('k'),
             ],
-            balanceFactor: vec![
+            balance_factor: vec![
                 4,
                 2, 3,
                 1, 1, 2, 2,
@@ -265,7 +265,7 @@ mod tests {
             Some('b'), Some('f'), Some('i'), Some('k'),
             Some('a'), Some('c'), Some('e'), Some('g'), None, None, None, Some('l')
         ]);
-        assert_eq!(root.balanceFactor, vec![
+        assert_eq!(root.balance_factor, vec![
             4,
             3, 3,
             2, 2, 1, 2,
@@ -280,7 +280,7 @@ mod tests {
     fn move_nodes_left() {
         let mut root = AVLTree {
             root: vec![Some('b'), Some('a'), Some('c'), None, None, None, None],
-            balanceFactor: vec![2, 1, 1, 0, 0, 0, 0],
+            balance_factor: vec![2, 1, 1, 0, 0, 0, 0],
             nodes: 3,
             height: 2
         };
@@ -298,7 +298,7 @@ mod tests {
     fn move_nodes_right() {
         let mut root = AVLTree {
             root: vec![Some('b'), Some('a'), Some('c'), None, None, None, None],
-            balanceFactor: vec![2, 1, 1, 0, 0, 0, 0],
+            balance_factor: vec![2, 1, 1, 0, 0, 0, 0],
             nodes: 3,
             height: 2
         };
@@ -316,7 +316,7 @@ mod tests {
     fn move_nodes_left_complex() {
         let mut root = AVLTree {
             root: vec![Some('d'), Some('b'), Some('f'), Some('a'), Some('c'), Some('e'), Some('g')],
-            balanceFactor: vec![3, 2, 2, 1, 1, 1, 1],
+            balance_factor: vec![3, 2, 2, 1, 1, 1, 1],
             nodes: 7,
             height: 2
         };
@@ -335,7 +335,7 @@ mod tests {
     fn move_nodes_right_complex() {
         let mut root = AVLTree {
             root: vec![Some('d'), Some('b'), Some('f'), Some('a'), Some('c'), Some('e'), Some('g')],
-            balanceFactor: vec![3, 2, 2, 1, 1, 1, 1],
+            balance_factor: vec![3, 2, 2, 1, 1, 1, 1],
             nodes: 7,
             height: 2
         };
@@ -357,7 +357,7 @@ mod tests {
     fn rotate_left_single_val() {
         let mut root: AVLTree<char> = AVLTree {
             root: vec![Some('a')],
-            balanceFactor: vec![3],
+            balance_factor: vec![3],
             nodes: 1,
             height: 0,
         };
@@ -373,7 +373,7 @@ mod tests {
     fn rotate_right_single_val() {
         let mut root: AVLTree<char> = AVLTree {
             root: vec![Some('a')],
-            balanceFactor: vec![3],
+            balance_factor: vec![3],
             nodes: 1,
             height: 0,
         };
@@ -393,7 +393,7 @@ mod tests {
                 None, Some('b'),
                 None, None, None, Some('c')
             ],
-            balanceFactor: vec![
+            balance_factor: vec![
                 2,
                 0, 1,
                 0, 0, 0, 0
@@ -419,7 +419,7 @@ mod tests {
                 Some('b'), None,
                 Some('a'), None, None, None
             ],
-            balanceFactor: vec![
+            balance_factor: vec![
                 2,
                 1, 0,
                 0, 0, 0, 0
@@ -445,7 +445,7 @@ mod tests {
                 Some('a'), None,
                 None, Some('b'), None, None
             ],
-            balanceFactor: vec![
+            balance_factor: vec![
                 3,
                 2, 0,
                 0, 1, 0, 0
@@ -472,7 +472,7 @@ mod tests {
                 None, Some('c'),
                 None, None, Some('b'), None
             ],
-            balanceFactor: vec![
+            balance_factor: vec![
                 3,
                 0, 2,
                 0, 0, 1, 0

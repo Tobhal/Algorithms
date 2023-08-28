@@ -11,17 +11,17 @@ fn main() {
     /*
     Get info of the binary tree
      */
-    let numNodes = root.num_nodes();
-    let numLevels = root.num_levels();
-    let numLeaves = root.num_leaves();
-    let numTwoChildren = root.num_two_children();
+    let num_nodes = root.num_nodes();
+    let num_levels = root.num_levels();
+    let num_leaves = root.num_leaves();
+    let num_two_children = root.num_two_children();
 
     /*
     Traversing
      */
-    let preOrder = root.pre_order_from(0);
-    let inOrder = root.in_order_from(0);
-    let postOrder = root.post_order_from(0);
+    let pre_order = root.pre_order_from(0);
+    let in_order = root.in_order_from(0);
+    let post_order = root.post_order_from(0);
     let bfs = root.bfs_from(0);
 
 }
