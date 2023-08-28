@@ -100,6 +100,9 @@ pub struct Graph<T> {
     pub(crate) weighted: bool
 }
 
+/*
+New
+ */
 impl<T> Graph<T> {
     pub(crate) fn new() -> Graph<T> {
         Graph {
@@ -123,21 +126,8 @@ impl<T> Graph<T> {
     }
 }
 
-impl<T> From<Vec<(T, Vec<usize>)>> for Graph<T>
-where T: Default + Clone {
-    fn from(value: Vec<(T, Vec<usize>)>) -> Self {
-        let mut graph = Graph::<T>::new_with_size(value.len());
-
-        for (idx, node) in value.iter().enumerate() {
-            graph.nodes[idx] = Node::from(node.clone())
-        }
-
-        graph
-    }
-}
-
 impl<T> Graph<T>
-where T: Default {
+    where T: Default {
     pub(crate) fn new_with_size(size: usize) -> Graph<T> {
         let mut v = vec![];
 
@@ -153,8 +143,23 @@ where T: Default {
     }
 }
 
+impl<T> From<Vec<(T, Vec<usize>)>> for Graph<T>
+    where T: Default + Clone {
+    fn from(value: Vec<(T, Vec<usize>)>) -> Self {
+        let mut graph = Graph::<T>::new_with_size(value.len());
+
+        for (idx, node) in value.iter().enumerate() {
+            graph.nodes[idx] = Node::from(node.clone())
+        }
+
+        graph
+    }
+}
+
+
+
 impl<T> Display for Graph<T>
-where T: Display {
+    where T: Display {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         let mut display_string = String::new();
 
@@ -259,7 +264,7 @@ impl<T> Graph<T> {
 
             // there are no childs, move back to parent, or break out of loop
             match parent.pop_back() {
-                Some(V) => current_node = V,
+                Some(v) => current_node = v,
                 None => return out
             }
         }
@@ -286,14 +291,54 @@ impl<T> Graph<T> {
             }
 
             match childs.pop_back() {
-                Some(V) => current_node = V,
+                Some(v) => current_node = v,
                 None => return out
             }
         }
     }
 }
 
+/*
+Get neighborhood
+ */
+impl<T> Graph<T> {
+    pub(crate) fn get_neighborhood_matrix(&self) -> Vec<Vec<bool>> {
+        let mut neighborhood = vec![vec![false; self.nodes.len()]; self.nodes.len()];
 
+        for i in 0..neighborhood.len() {
+            neighborhood[i][i] = true;
+        }
+
+        self.nodes
+            .iter()
+            .enumerate()
+            .for_each(|(idx, node)| node.children
+                    .iter()
+                    .for_each(|child| neighborhood[idx][child.idx] = true)
+            );
+
+        neighborhood
+    }
+}
+
+/*
+Reachability
+ */
+impl<T> Graph<T> {
+    pub(crate) fn warshall(self) -> Vec<Vec<bool>> {
+        let mut neighborhood = self.get_neighborhood_matrix();
+
+        for k in 0..neighborhood.len() {
+            for i in 0..neighborhood.len() {
+                for j in 0..neighborhood.len() {
+                    neighborhood[i][j] = neighborhood[i][j] || (neighborhood[i][k] && neighborhood[k][j])
+                }
+            }
+        }
+
+        neighborhood
+    }
+}
 
 
 
