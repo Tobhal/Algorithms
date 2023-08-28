@@ -49,13 +49,11 @@ Node
  */
 #[derive(Debug)]
 pub struct Node<T> {
-where T: Debug {
     pub(crate) val: T,
     pub(crate) children: Vec<Child> // child and weight
 }
 
 impl<T> Node<T> {
-where T: Debug {
     pub(crate) fn new(val: T) -> Node<T> {
         Node {
             val,
@@ -82,7 +80,6 @@ where T: Debug {
 }
 
 impl<T> From<(T, Vec<usize>)> for Node<T> {
-where T: Debug {
     fn from(value: (T, Vec<usize>)) -> Self {
         Node {
             val: value.0,
@@ -99,13 +96,11 @@ Graph
  */
 #[derive(Debug)]
 pub struct Graph<T> {
-where T: Debug {
     pub(crate) nodes: Vec<Node<T>>,
     pub(crate) weighted: bool
 }
 
 impl<T> Graph<T> {
-where T: Debug {
     pub(crate) fn new() -> Graph<T> {
         Graph {
             nodes: vec![],
@@ -166,56 +161,56 @@ where T: Display {
         // Add number of nodes
         display_string += &*self.nodes.len().to_string();
 
-        let indexWidth = display_string.len();
+        let index_width = display_string.len();
 
-        let mut numChildWidth = 0;
-        let mut childWidth = 0;
-        let mut valWidth = 0;
+        let mut num_child_width = 0;
+        let mut child_width = 0;
+        let mut val_width = 0;
 
         for node in self.nodes.iter() {
-            numChildWidth = if node.children.len().to_string().len() > numChildWidth {
+            num_child_width = if node.children.len().to_string().len() > num_child_width {
                 node.children.len().to_string().len()
             } else {
-                numChildWidth
+                num_child_width
             };
 
-            valWidth = if node.val.to_string().len() > valWidth {
+            val_width = if node.val.to_string().len() > val_width {
                 node.val.to_string().len()
             } else {
-                valWidth
+                val_width
             };
 
             if self.weighted {
                 for child in node.children.iter() {
-                    childWidth = if child.weight.to_string().len() > childWidth {
+                    child_width = if child.weight.to_string().len() > child_width {
                         child.weight.to_string().len()
                     } else {
-                        childWidth
+                        child_width
                     };
                 }
             }
         }
 
         if self.weighted {
-            childWidth += 3;
+            child_width += 3;
         }
 
-        valWidth += 1;
+        val_width += 1;
 
         // Add header
         display_string += "\n";
-        display_string += format!("{:indexWidth$}  {:valWidth$}{:numChildWidth$}   {:width$}\n", "n", "v", "nc", "c", width = indexWidth + childWidth).as_str();
+        display_string += format!("{:index_width$}  {:val_width$}{:num_child_width$}   {:width$}\n", "n", "v", "nc", "c", width = index_width + child_width).as_str();
 
 
         for (i, node) in self.nodes.iter().enumerate() {
             display_string += &*format!("{:indexWidth$} {:valWidth$} {:numChildWidth$}    ",
                                         i, node.val, node.children.len(),
-                                        indexWidth = indexWidth,
-                                        valWidth = valWidth,
-                                        numChildWidth = numChildWidth);
+                                        indexWidth = index_width,
+                                        valWidth = val_width,
+                                        numChildWidth = num_child_width);
 
             for child in node.children.iter() {
-                display_string += &*format!("{:width$} ", child.get_clean_value(self.weighted), width = indexWidth + childWidth);
+                display_string += &*format!("{:width$} ", child.get_clean_value(self.weighted), width = index_width + child_width);
             }
 
             display_string += "\n";
@@ -228,35 +223,34 @@ where T: Display {
 /*
 Traversal
  */
-impl<T> Graph<T>
-where T: Debug {
-    pub(crate) fn dfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
+impl<T> Graph<T> {
+    pub(crate) fn dfs(&self, from_index: usize) -> Vec<&Node<T>> {
         let mut parent: VecDeque<usize> = VecDeque::new();
-        let mut out: Vec<&Node<T>> = vec![&self.nodes[fromIndex]];
+        let mut out: Vec<&Node<T>> = vec![&self.nodes[from_index]];
         let mut visited: Vec<bool> = vec![false; self.nodes.len()];
 
         parent.reserve(self.nodes.len());
         out.reserve(self.nodes.len());
-        visited[fromIndex] = true;
+        visited[from_index] = true;
 
-        let mut currentNode = fromIndex;
+        let mut current_node = from_index;
 
         'outer: loop {
             // loop through all children to the current node
-            for c in self.nodes[currentNode].children.iter() {
+            for c in self.nodes[current_node].children.iter() {
                 // check if not the child is already visited
                 if !visited[c.idx] {
                     // register as visited
                     visited[c.idx] = true;
 
                     // add parent to parent stack
-                    parent.push_back(currentNode);
+                    parent.push_back(current_node);
 
                     // add child node as current node
-                    currentNode = c.idx;
+                    current_node = c.idx;
 
                     // add child node to output
-                    out.push(&self.nodes[currentNode]);
+                    out.push(&self.nodes[current_node]);
 
                     // continue loop
                     continue 'outer;
@@ -265,13 +259,13 @@ where T: Debug {
 
             // there are no childs, move back to parent, or break out of loop
             match parent.pop_back() {
-                Some(V) => currentNode = V,
+                Some(V) => current_node = V,
                 None => return out
             }
         }
     }
 
-    pub(crate) fn bfs(&self, fromIndex: usize) -> Vec<&Node<T>> {
+    pub(crate) fn bfs(&self, from_index: usize) -> Vec<&Node<T>> {
         let mut childs: VecDeque<usize> = VecDeque::new();
         let mut out: Vec<&Node<T>> = vec![];
         let mut visited: Vec<bool> = vec![false; self.nodes.len()];
@@ -279,27 +273,25 @@ where T: Debug {
         childs.reserve(self.nodes.len());
         out.reserve(self.nodes.len());
 
-        let mut currentNode: usize = fromIndex;
+        let mut current_node: usize = from_index;
 
         loop {
-            if !visited[currentNode] {
-                self.nodes[currentNode].children.iter()
+            if !visited[current_node] {
+                self.nodes[current_node].children.iter()
                     .filter(|c| !visited[c.idx])
                     .for_each(|c| childs.push_front(c.idx));
 
-                visited[currentNode] = true;
-                out.push(&self.nodes[currentNode]);
+                visited[current_node] = true;
+                out.push(&self.nodes[current_node]);
             }
 
             match childs.pop_back() {
-                Some(V) => currentNode = V,
+                Some(V) => current_node = V,
                 None => return out
             }
         }
     }
 }
-
-
 
 
 
