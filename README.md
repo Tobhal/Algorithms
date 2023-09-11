@@ -1,4 +1,4 @@
-# Algoritmes
+# Algorithms
 Implementation of diffrent algoritmes implemented with Node(pointer/refrences) and/or array
 
 ## Current algoritmes:
