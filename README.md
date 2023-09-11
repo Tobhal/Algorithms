@@ -1,5 +1,5 @@
 # Algorithms
-Implementation of diffrent algoritmes implemented with Node(pointer/refrences) and/or array
+Implementation of diffrent algoritmes arrays.
 
 ## Current algoritmes:
 - BinaryTree (Array)
