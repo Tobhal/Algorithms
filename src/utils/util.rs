@@ -494,6 +494,7 @@ macro_rules! impl_BFS {
             fn bfs(&self) -> Vec<T> {
                 self.bfs_from(0)
             }
+
             fn bfs_from(&self, idx: usize) -> Vec<T> {
                 if self.root.is_empty() || self.root[idx] == None {return vec![];}
 

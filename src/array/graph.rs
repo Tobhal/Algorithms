@@ -4,6 +4,7 @@ use std::{fmt, fs};
 use std::collections::VecDeque;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::str::FromStr;
 
 /*
 Child
@@ -91,6 +92,18 @@ impl<T> From<(T, Vec<usize>)> for Node<T> {
     }
 }
 
+impl<T> From<(T, Vec<(usize, u32)>)> for Node<T> {
+    fn from(value: (T, Vec<(usize, u32)>)) -> Self {
+        Node {
+            val: value.0,
+            children: value.1
+                .iter()
+                .map(|val| Child::new_with_weight(val.0.clone(), val.1.clone()))
+                .collect()
+        }
+    }
+}
+
 /*
 Graph
  */
@@ -143,6 +156,9 @@ impl<T> Graph<T>
     }
 }
 
+/*
+From implementations
+ */
 impl<T> From<Vec<(T, Vec<usize>)>> for Graph<T>
     where T: Default + Clone {
     fn from(value: Vec<(T, Vec<usize>)>) -> Self {
@@ -156,7 +172,86 @@ impl<T> From<Vec<(T, Vec<usize>)>> for Graph<T>
     }
 }
 
+impl From<File> for Graph<String> {
+    fn from(value: File) -> Self {
+        let mut graph: Graph<String> = Graph::new();
 
+        let mut reader = BufReader::new(value);
+
+        // read the first line
+        let mut number_of_nodes = String::new();
+        reader.read_line(&mut number_of_nodes).unwrap();
+
+        let number_of_nodes: u32 = number_of_nodes.trim_end().parse().unwrap();
+
+        reader.lines().for_each(|line| {
+            let line = line.unwrap();
+
+            let mut split = line.split_whitespace();
+
+            let idx: u32 = split.next().unwrap().parse().unwrap();
+            let value: String = split.next().unwrap().parse().unwrap();
+
+            let num_nodes: u32 = split.next().unwrap().parse().unwrap();
+
+            let node_children: Vec<usize> = (0..num_nodes)
+                .map(|i| split.next().unwrap().parse().unwrap())
+                .collect();
+
+            graph.add_node(Node::from((value, node_children)));
+        });
+
+        graph
+    }
+}
+
+
+impl From<File> for Graph<char> {
+    fn from(value: File) -> Self {
+        let mut graph: Graph<char> = Graph::new();
+
+        let mut reader = BufReader::new(value);
+
+        // read the first line
+        let mut number_of_nodes = String::new();
+        reader.read_line(&mut number_of_nodes).unwrap();
+
+        let number_of_nodes: u32 = number_of_nodes.trim_end().parse().unwrap();
+
+        reader.lines().for_each(|line| {
+            let line = line.unwrap();
+
+            let mut split = line.split_whitespace();
+
+            let idx: u32 = split.next().unwrap().parse().unwrap();
+            let value: char = split.next().unwrap().parse().unwrap();
+
+            let num_nodes: usize = split.next().unwrap().parse().unwrap();
+            let children_count = split.clone().count();
+
+            let weighted = children_count != num_nodes;
+
+            if weighted {
+                let node_children: Vec<(usize, u32)> = (0..num_nodes)
+                    .map(|i| (
+                        split.next().unwrap().parse().unwrap(),
+                        split.next().unwrap().parse().unwrap()
+                    ))
+                    .collect();
+
+                graph.add_node(Node::from((value, node_children)));
+            } else {
+                let node_children: Vec<usize> = (0..num_nodes)
+                    .map(|i| split.next().unwrap().parse().unwrap())
+                    .collect();
+
+                graph.add_node(Node::from((value, node_children)));
+            }
+        });
+
+        graph
+    }
+}
 
 impl<T> Display for Graph<T>
     where T: Display {
@@ -326,15 +421,16 @@ Reachability
  */
 impl<T> Graph<T> {
     pub(crate) fn warshall(self) -> Vec<Vec<bool>> {
+        let neighborhood_size = self.nodes.len();
         let mut neighborhood = self.get_neighborhood_matrix();
 
-        for k in 0..neighborhood.len() {
-            for i in 0..neighborhood.len() {
-                for j in 0..neighborhood.len() {
-                    neighborhood[i][j] = neighborhood[i][j] || (neighborhood[i][k] && neighborhood[k][j])
-                }
-            }
-        }
+        (0..neighborhood_size).for_each(|k| {
+            (0..neighborhood_size).for_each(|i| {
+                (0..neighborhood_size).for_each(|j| {
+                    neighborhood[i][j] = neighborhood[i][j] || (neighborhood[i][k] && neighborhood[k][j]);
+                });
+            });
+        });
 
         neighborhood
     }

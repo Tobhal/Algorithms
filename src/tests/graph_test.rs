@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use std::fs::File;
     use crate::array::graph::{Child, Graph, Node};
 
     #[test]
@@ -110,5 +111,68 @@ mod tests {
         ];
 
         assert_eq!(aprp, solution_aprp)
+    }
+
+    #[test]
+    fn unweighted_from_file() {
+        let file = File::open("/Users/tobiashallingstad/Prog/Languages/Rust/Algoritmes/src/files/graf_13.txt").unwrap();
+        let graph: Graph<char> = Graph::from(file);
+
+        let correct_graph = vec![
+            ('A', vec![1, 5, 6]),
+            ('B', vec![]),
+            ('C', vec![0]),
+            ('D', vec![5]),
+            ('E', vec![3]),
+            ('F', vec![4]),
+            ('G', vec![2, 4, 9]),
+            ('H', vec![6, 8]),
+            ('I', vec![7]),
+            ('J', vec![10, 11, 12]),
+            ('K', vec![]),
+            ('L', vec![6, 12]),
+            ('M', vec![11]),
+        ];
+
+        graph.nodes.iter().enumerate().for_each(|(idx, node)| {
+            let children: Vec<usize> = node.children.iter().map(|child| child.idx).collect();
+            let correct_values = &correct_graph[idx];
+
+            assert_eq!(node.val, correct_values.0);
+            assert_eq!(children, correct_values.1);
+        });
+    }
+
+    #[test]
+    fn weighed_from_file() {
+        let file = File::open("/Users/tobiashallingstad/Prog/Languages/Rust/Algoritmes/src/files/vgraf_13.txt").unwrap();
+        let graph: Graph<char> = Graph::from(file);
+
+        let correct_graph = vec![
+            ('A', vec![(1, 1), (5, 2), (6, 4)]),
+            ('B', vec![]),
+            ('C', vec![(0, 1)]),
+            ('D', vec![(5, 1)]),
+            ('E', vec![(3, 2)]),
+            ('F', vec![(4, 2)]),
+            ('G', vec![(2, 1), (4, 1), (9, 1)]),
+            ('H', vec![(6, 3), (8, 2)]),
+            ('I', vec![(7, 2)]),
+            ('J', vec![(10, 1), (11, 3), (12, 2)]),
+            ('K', vec![]),
+            ('L', vec![(6, 5), (12, 1)]),
+            ('M', vec![(11, 1)]),
+        ];
+
+        graph.nodes.iter().enumerate().for_each(|(idx, node)| {
+            let children: Vec<(usize, u32)> = node.children.iter()
+                .map(|child| (child.idx, child.weight))
+                .collect();
+
+            let correct_values = &correct_graph[idx];
+
+            assert_eq!(node.val, correct_values.0);
+            assert_eq!(children, correct_values.1);
+        });
     }
 }
