@@ -2,6 +2,7 @@ use std::arch::aarch64::poly8x8_t;
 use std::collections::VecDeque;
 use std::env::current_exe;
 use std::fmt::{Debug, Display};
+use std::fs::create_dir;
 use std::process::id;
 use std::thread::current;
 use crate::array::binary_tree::BinaryTree;
@@ -12,6 +13,7 @@ use crate::utils::util::{
 
 // https://cmps-people.ok.ubc.ca/ylucet/DS/AVLtree.html
 
+#[derive(Debug)]
 pub(crate) enum Direction {
     LEFT,
     RIGHT
@@ -76,13 +78,22 @@ impl_BFS!(AVLTree<T: PartialOrd + Copy>);
 impl<T> AVLTree<T> {
     pub(crate) fn new() -> AVLTree<T> {
         AVLTree {
-            root: vec![],
-            balance_factor: vec![],
+            root: vec![None],
+            balance_factor: vec![0],
             nodes: 0,
             height: 0
         }
     }
 
+}
+
+impl<T> AVLTree<T>
+where T: Debug + Copy {
+    pub(crate) fn insert_private(&mut self, index: usize, val: T) {
+        println!("Insert: [{:?}] -> {}[{:?}]", val, index, self.root[index].as_ref());
+        self.root[index] = Some(val);   // Insert the value
+        self.balance_factor[index] = 1;  // Update the balance factor
+    }
 }
 
 impl<T> AVLTree<T>
@@ -108,27 +119,35 @@ where T: PartialOrd + Copy + Debug {
 impl<T> Insert<T> for AVLTree<T>
 where T: PartialOrd + Copy + Debug {
     fn insert(&mut self, data: T) {
+        // If the tree is 0 just push the value to the first element
         if self.root.len() == 0 {
-            self.root.push(Some(data));
-            self.balance_factor.push(1);
+            self.insert_private(0, data);
             return;
         }
 
+        // Start at node index 0
         let mut node_idx: usize = 0;
 
         // Insert node
+        // Loops until the node is placed. Tree is not balanced after this point
         loop {
+            // If the node is in a new layer (might be temporary).
+            // Here so when adding nodes nothing goes out of bounds
             if node_idx >= self.root.len() {
                 self.increase_levels(1);
             }
 
+            // Check if the moved to node is empty
+            // If it is empty: place the node value here
+            // If it is not empty: move to the next correct node
             match self.root[node_idx] {
+                // The node is empty
                 None => {
-                    println!("Insert {data:?} in {node_idx}");
-                    self.root[node_idx] = Some(data);
-                    self.balance_factor[node_idx] = 1;
-                    break;
+                    self.insert_private(node_idx, data);
+                    break;  // Exit loop
                 }
+                // The node is not empty.
+                // Moves to the correct child. This is the part that loops.
                 Some(val) => {
                     node_idx = if val > data {
                         AVLTree::<T>::left_child(node_idx)
@@ -139,32 +158,41 @@ where T: PartialOrd + Copy + Debug {
             }
         }
 
+        // Define index for left and right node
         let mut left_node: usize = 0;
         let mut right_node: usize = 0;
 
+        // Should decrease the size of the tree
         let mut decrease_size = false;
 
+        // Store the last balance factor
         let mut last_balance_factor: u32 = 1;
 
-        // Update balance factor and rotate
+        // Update balance factor and rotate (if needed)
         while node_idx != 0 {
+            // Move to the parent node
             node_idx = AVLTree::<T>::parent(node_idx);
 
+            // Update the balance factor of the parent node, if the parent nodes balance factor is to low
+            // TODO: Change to equal or less?
             if last_balance_factor == self.balance_factor[node_idx] {
                 self.balance_factor[node_idx] += 1;
                 last_balance_factor = self.balance_factor[node_idx];
             }
 
+            // Find the left and right node from the parent node.
             left_node = AVLTree::<T>::left_child(node_idx);
             right_node = AVLTree::<T>::right_child(node_idx);
 
+            let balance_left = self.balance_factor[left_node];
+            let balance_right = self.balance_factor[right_node];
+
+            // Figure out if should rotate left of right.
             if self.balance_factor[left_node] > (self.balance_factor[right_node] + 1) {
-                println!("Rotate right");
                 self.rotate(node_idx, Direction::RIGHT);
                 last_balance_factor -= 1;
                 decrease_size = true;
             } else if self.balance_factor[right_node] > (self.balance_factor[left_node] + 1) {
-                println!("Rotate left");
                 self.rotate(node_idx, Direction::LEFT);
                 last_balance_factor -= 1;
                 decrease_size = true
@@ -194,12 +222,15 @@ pub(crate) trait Rotate {
 impl<T> Rotate for AVLTree<T>
 where T: PartialOrd + Copy + Debug {
     fn rotate(&mut self, idx: usize, dir: Direction) {
+        println!("Rotate: {:?}", dir);
+
         let (dir_towards, dir_against): (fn(usize) -> usize, fn(usize) -> usize) = Direction::get_direction_func(dir);
 
         if self.root[dir_towards(idx)] != None {
             self.move_nodes(dir_towards(idx), dir_towards(dir_towards(idx)))
         }
 
+        println!("\tMove: {}[{:?}] -> {}[{:?}]", idx, self.root[idx], dir_towards(idx), self.root[dir_towards(idx)]);
         self.root[dir_towards(idx)] = self.root[idx];
         self.root[idx] = None;
 
@@ -227,32 +258,50 @@ where T: PartialOrd + Copy + Debug {
         let mut parent_idx = idx;
         let mut current_node = dir_against(idx);
 
+        // let bfs = self.bfs_from(current_node);
 
-        // Note: Implement BFS for moving the nodes. So:
+        // println!("{bfs:?}");
+
+        // Note: Implement BFS for moving the nodes. But this cant be a totaly normal BFS(mabye?) So:
         //  1. Append all children to a list
         //  2. Move the children
         //  3. Go to the childrens location and append their children
         //  4. If there are any children repeat until no more children or index_out()
         // Move nodes up
+
+        // Node for where to move the node to
+        let mut mirror_node: usize = AVLTree::<T>::parent(current_node);
+
         loop {
             parent_idx = AVLTree::<T>::parent(current_node);
 
-            println!("\t{:?} -> {:?}*", self.root[current_node], self.root[parent_idx]);
-
             // Move current node 1 step up
-            self.root[parent_idx] = self.root[current_node];
-            self.balance_factor[parent_idx] = self.balance_factor[current_node];
+            if self.root[current_node] != None {
+                println!("\tMove: {}[{:?}] -> {}[{:?}] | rotate", current_node, self.root[current_node], parent_idx, self.root[parent_idx]);
+                self.root[mirror_node] = self.root[current_node];
+                self.balance_factor[mirror_node] = self.balance_factor[current_node];
 
-            self.root[current_node] = None;
-            self.balance_factor[current_node] = 0;
+                self.root[current_node] = None;
+                self.balance_factor[current_node] = 0;
+            }
 
-            // Note: The problem is here
-            // If current node is out of bounce, break
             if self.index_out(current_node) {
                 break;
             }
 
-            current_node = dir_against(current_node);
+            // Note: This is the actual error. It is only moving in `dir_against()`.
+            if self.root[dir_towards(current_node)] != None {
+                current_node = dir_towards(current_node);
+                mirror_node = dir_towards(mirror_node);
+            } else if self.root[dir_against(current_node)] != None {
+                current_node = dir_against(current_node);
+                mirror_node = dir_against(mirror_node);
+            } else if current_node == 0 {
+                break;
+            } else {
+                current_node = AVLTree::<T>::parent(current_node);
+                mirror_node = AVLTree::<T>::parent(mirror_node);
+            }
         }
     }
 
@@ -285,8 +334,9 @@ where T: PartialOrd + Copy + Debug {
                             self.increase_levels(1);
                         }
 
-                        println!("\t{:?} -> {:?}", self.root[from_idx], self.root[to_idx]);
+                        println!("\tMove: {}[{:?}] -> {}[{:?}] | leaf", from_idx, self.root[from_idx], to_idx, self.root[to_idx]);
 
+                        // TODO: Check if there is a value at location, it there handle this correct.
                         self.root[to_idx] = self.root[from_idx];
                         self.balance_factor[to_idx] = self.balance_factor[from_idx];
 
@@ -383,6 +433,8 @@ impl<T> Util<T> for AVLTree<T>
     }
 
     fn decrease_levels(&mut self, amount: u32) {
+        println!("Reduce levels");
+
         self.height -= amount;
         self.nodes = 2_i32.pow(self.height + amount) as u32 - 1;
 

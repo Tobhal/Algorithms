@@ -176,8 +176,6 @@ mod tests {
             None, None, None, None, Some('e'), Some('g'), Some('i'), Some('k'),
         ]);
 
-        // Note: Big change to tree, so there might be errors here.
-        // Note: 'i' from second to last position is not moved. So there needs to be added a loop somewhere.
         root.insert('l');
         assert_eq!(root.root, vec![
             Some('h'),
@@ -211,66 +209,19 @@ mod tests {
         ]);
     }
 
-    /*
-    Insert complex
-     */
     #[test]
-    fn insert_complex() {
-        // TODO: Fix
-        /*
-                       d
-               b               h
-           a       c       f       j
-         _   _   _   _   e   g   i   k
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        -------------------------------
-        d b h a c f j _ _ _ _ e g i k
-        -------------------------------
-        insert l
-        -------------------------------
-                       h
-               d               j
-           b       f       i       k
-         a   c   e   g   _   _   _   l
-        _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
-        -------------------------------
-        h d j b f i k a c e g _ _ _ l
-         */
-        let mut root = AVLTree {
-            root: vec![
-                Some('d'),
-                Some('b'), Some('h'),
-                Some('a'), Some('c'), Some('f'), Some('j'),
-                None, None, None, None, Some('e'), Some('g'), Some('i'), Some('k'),
-            ],
-            balance_factor: vec![
-                4,
-                2, 3,
-                1, 1, 2, 2,
-                0, 0, 0, 0, 1, 1, 1, 1
-            ],
-            nodes: 11,
-            height: 4
-        };
+    fn insert_iterative_full() {
+        let alphabet = vec!['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
-        root.println();
-
-        root.insert('l');
-
-        root.println();
+        let mut root = AVLTree::new_from_vec(alphabet);
 
         assert_eq!(root.root, vec![
-            Some('h'),
-            Some('d'), Some('j'),
-            Some('b'), Some('f'), Some('i'), Some('k'),
-            Some('a'), Some('c'), Some('e'), Some('g'), None, None, None, Some('l')
-        ]);
-        assert_eq!(root.balance_factor, vec![
-            4,
-            3, 3,
-            2, 2, 1, 2,
-            1, 1, 1, 1, 0, 0, 0, 1
-        ]);
+            Some('p'),
+            Some('h'), Some('t'),
+            Some('d'), Some('l'), Some('r'), Some('x'),
+            Some('b'), Some('f'), Some('j'), Some('n'), Some('q'), Some('q'), Some('v'), Some('y'),
+            Some('a'), Some('c'), Some('e'), Some('g'), Some('i'), Some('k'), Some('m'), Some('o'), None, None, Some('u'), Some('w'), None, Some('z')
+        ])
     }
 
     /*
